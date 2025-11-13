@@ -1,0 +1,661 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+.agent-reception {
+  font-family: 'Inter', sans-serif;
+  background-color: #f7f9fb;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Inclure tous les styles de header/footer de PreparateurCommandes */
+/* Les mêmes que dans AdministrationLogistique.css */
+
+/* Styles spécifiques à la réception */
+.reception-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  overflow-x: auto;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-button:hover {
+  color: #2563eb;
+}
+
+.tab-button.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+  background-color: #f0f9ff;
+}
+
+.tab-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Tab Content */
+.tab-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Metrics Grid */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border-top: 4px solid;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.metric-card.blue {
+  border-top-color: #3b82f6;
+}
+
+.metric-card.green {
+  border-top-color: #10b981;
+}
+
+.metric-card.purple {
+  border-top-color: #8b5cf6;
+}
+
+.metric-card.orange {
+  border-top-color: #f59e0b;
+}
+
+.metric-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.5rem 0;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.metric-value.blue {
+  color: #2563eb;
+}
+
+.metric-value.green {
+  color: #059669;
+}
+
+.metric-value.purple {
+  color: #7c3aed;
+}
+
+.metric-value.orange {
+  color: #d97706;
+}
+
+.metric-subtext {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0.25rem 0 0 0;
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-card {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.dashboard-card h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 1rem 0;
+}
+
+/* Livraisons List */
+.livraisons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.livraison-item {
+  padding: 1.25rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.livraison-item:hover {
+  background-color: #f3f4f6;
+}
+
+.livraison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.livraison-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.livraison-info strong {
+  color: #1f2937;
+  font-size: 1rem;
+}
+
+.fournisseur {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.livraison-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.value {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.value.retard {
+  color: #dc2626;
+}
+
+.livraison-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Réceptions List */
+.receptions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.reception-item {
+  padding: 1.25rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.reception-item:hover {
+  background-color: #f3f4f6;
+}
+
+.reception-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.reception-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.reception-info strong {
+  color: #1f2937;
+  font-size: 1rem;
+}
+
+.reception-progress {
+  margin-bottom: 1rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #10b981;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.reception-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.reception-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Quais Grid */
+.quais-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.quai-card {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #e5e7eb;
+}
+
+.quai-card.occupe {
+  border-left-color: #f59e0b;
+}
+
+.quai-card.libre {
+  border-left-color: #10b981;
+}
+
+.quai-card.maintenance {
+  border-left-color: #6b7280;
+}
+
+.quai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.quai-header h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.quai-occupation {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.occupation-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.occupation-info strong {
+  color: #1f2937;
+}
+
+.vehicule, .heure {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.occupation-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.quai-libre {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.quai-libre p {
+  color: #059669;
+  font-weight: 500;
+  margin: 0;
+}
+
+.quai-maintenance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.quai-maintenance p {
+  color: #6b7280;
+  font-weight: 500;
+  margin: 0;
+}
+
+.maintenance-info {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+/* Alertes Container */
+.alertes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.alerte-card {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #e5e7eb;
+}
+
+.alerte-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.alerte-content {
+  margin-bottom: 1rem;
+}
+
+.alerte-message {
+  font-size: 1rem;
+  color: #374151;
+  margin: 0 0 0.75rem 0;
+  font-weight: 500;
+}
+
+.alerte-produit {
+  display: block;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.alerte-timestamp {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.alerte-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Action Buttons */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.action-button.primary {
+  background-color: #2563eb;
+  color: white;
+}
+
+.action-button.primary:hover {
+  background-color: #1d4ed8;
+}
+
+.action-button.secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.action-button.secondary:hover {
+  background-color: #4b5563;
+}
+
+.action-button.success {
+  background-color: #059669;
+  color: white;
+}
+
+.action-button.success:hover {
+  background-color: #047857;
+}
+
+.action-button.warning {
+  background-color: #d97706;
+  color: white;
+}
+
+.action-button.warning:hover {
+  background-color: #b45309;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.badge-success {
+  background-color: #d1fae5;
+}
+
+.badge-success-text {
+  color: #065f46;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+}
+
+.badge-warning-text {
+  color: #92400e;
+}
+
+.badge-info {
+  background-color: #dbeafe;
+}
+
+.badge-info-text {
+  color: #1e40af;
+}
+
+.badge-error {
+  background-color: #fee2e2;
+}
+
+.badge-error-text {
+  color: #991b1b;
+}
+
+.badge-default {
+  background-color: #f3f4f6;
+}
+
+.badge-default-text {
+  color: #374151;
+}
+
+/* Select Control */
+.select-control {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background-color: white;
+  color: #374151;
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.section-header h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #374151;
+  margin: 0;
+}
+
+.section-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Status Message */
+.status-message {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  animation: slideIn 0.3s ease-out;
+}
+
+.status-message.info {
+  background-color: #2563eb;
+}
+
+.status-message.default {
+  background-color: #4b5563;
+}
+
+.status-message.success {
+  background-color: #059669;
+}
+
+.status-message.warning {
+  background-color: #d97706;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .reception-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .livraison-actions,
+  .reception-actions,
+  .occupation-actions,
+  .alerte-actions {
+    flex-direction: column;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quais-grid {
+    grid-template-columns: 1fr;
+  }
+}
