@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './AdministrationLogistique.css';
 
 const AdministrationLogistique = () => {
-  const [userName] = useState('Admin Logistique');
+  const navigate = useNavigate();
+  const [userName] = useState(localStorage.getItem('username') || 'Admin Logistique');
   const [statusMessage, setStatusMessage] = useState('');
   const [showStatus, setShowStatus] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -202,8 +204,9 @@ const AdministrationLogistique = () => {
   };
 
   const logout = () => {
-    console.log("Déconnexion de l'utilisateur. Retour à la page de connexion.");
-    showMessage("Vous avez été déconnecté.", 'info');
+    localStorage.removeItem('username');
+    localStorage.removeItem('rememberMe');
+    navigate('/');
   };
 
   const showMessage = (message, type) => {

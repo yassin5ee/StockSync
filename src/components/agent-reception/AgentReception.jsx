@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './AgentReception.css';
 
 const AgentReception = () => {
-  const [userName] = useState('Agent Réception');
+  const navigate = useNavigate();
+  const [userName] = useState(localStorage.getItem('username') || 'Agent Réception');
   const [statusMessage, setStatusMessage] = useState('');
   const [showStatus, setShowStatus] = useState(false);
   const [activeTab, setActiveTab] = useState('reception');
@@ -178,8 +180,9 @@ const AgentReception = () => {
   };
 
   const logout = () => {
-    console.log("Déconnexion de l'utilisateur. Retour à la page de connexion.");
-    showMessage("Vous avez été déconnecté.", 'info');
+    localStorage.removeItem('username');
+    localStorage.removeItem('rememberMe');
+    navigate('/');
   };
 
   const showMessage = (message, type) => {

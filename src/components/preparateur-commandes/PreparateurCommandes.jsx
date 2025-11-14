@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PreparateurCommandes.css';
 
 const PreparateurCommandes = () => {
-  const [userName] = useState('Préparateur');
+  const navigate = useNavigate();
+  const [userName] = useState(localStorage.getItem('username') || 'Préparateur');
   const [statusMessage, setStatusMessage] = useState('');
   const [showStatus, setShowStatus] = useState(false);
 
@@ -81,8 +83,9 @@ const PreparateurCommandes = () => {
   };
 
   const logout = () => {
-    console.log("Déconnexion de l'utilisateur. Retour à la page de connexion.");
-    showMessage("Vous avez été déconnecté.", 'info');
+    localStorage.removeItem('username');
+    localStorage.removeItem('rememberMe');
+    navigate('/');
   };
 
   const showMessage = (message, type) => {
