@@ -67,3 +67,9 @@ coverage/
 data/
 mongodb-data/
 
+# Documentation files (keep locally, but don't push to GitHub)
+# Ignore all .md files except README.md
+*.md
+!README.md
+!**/README.md
+

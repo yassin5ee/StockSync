@@ -40,37 +40,25 @@ async function seed() {
   const wh3 = await Warehouse.create({ name: 'Entrepôt Marseille Sud', location: 'Marseille, France', capacity: 6000, used: 4230, status: 'maintenance', manager: 'Julie Petit', productsCount: 1560 });
   const wh4 = await Warehouse.create({ name: 'Entrepôt Bordeaux Ouest', location: 'Bordeaux, France', capacity: 5000, used: 2980, status: 'operational', manager: 'Marc Dubois', productsCount: 980 });
 
-  // Function to generate random password
-  function generateRandomPassword(length: number = 12): string {
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const numbers = '0123456789';
-    const special = '!@#$%&*';
-    const allChars = uppercase + lowercase + numbers + special;
-    
-    let password = '';
-    // Ensure at least one character from each set
-    password += uppercase[Math.floor(Math.random() * uppercase.length)];
-    password += lowercase[Math.floor(Math.random() * lowercase.length)];
-    password += numbers[Math.floor(Math.random() * numbers.length)];
-    password += special[Math.floor(Math.random() * special.length)];
-    
-    // Fill the rest randomly
-    for (let i = password.length; i < length; i++) {
-      password += allChars[Math.floor(Math.random() * allChars.length)];
-    }
-    
-    // Shuffle the password
-    return password.split('').sort(() => Math.random() - 0.5).join('');
-  }
+  // Fixed strong passwords for development/testing (same passwords every time)
+  // These are strong passwords that remain consistent for easy testing
+  // In production, these should be changed or use proper password reset flows
+  const FIXED_PASSWORDS = {
+    admin: 'Admin@StockSync2024!',
+    data_analyst: 'DataAnalyst@2024!',
+    warehouse_supervisor: 'Warehouse@Super2024!',
+    logistic_admin: 'Logistic@Admin2024!',
+    'preparateur commend': 'Preparateur@2024!',
+    'agent de reception': 'Reception@Agent2024!'
+  };
 
   // Store credentials for output
   const credentials: Array<{email: string, password: string, role: string, name: string}> = [];
 
   // Create users with all required roles
   // All emails must be @stocksync.com
-  // Each user gets a unique random password
-  const adminPassword = generateRandomPassword();
+  // Each user gets a fixed password for easy testing
+  const adminPassword = FIXED_PASSWORDS.admin;
   const adminSalt = await bcrypt.genSalt(10);
   const adminHash = await bcrypt.hash(adminPassword, adminSalt);
   const admin = await User.create({ 
@@ -82,7 +70,7 @@ async function seed() {
   });
   credentials.push({ email: admin.email, password: adminPassword, role: 'admin', name: 'Yassine Amri' });
 
-  const dataAnalystPassword = generateRandomPassword();
+  const dataAnalystPassword = FIXED_PASSWORDS.data_analyst;
   const dataAnalystSalt = await bcrypt.genSalt(10);
   const dataAnalystHash = await bcrypt.hash(dataAnalystPassword, dataAnalystSalt);
   const dataAnalyst = await User.create({ 
@@ -94,7 +82,7 @@ async function seed() {
   });
   credentials.push({ email: dataAnalyst.email, password: dataAnalystPassword, role: 'data_analyst', name: 'Sarah Johnson' });
 
-  const warehouseSupervisorPassword = generateRandomPassword();
+  const warehouseSupervisorPassword = FIXED_PASSWORDS.warehouse_supervisor;
   const warehouseSupervisorSalt = await bcrypt.genSalt(10);
   const warehouseSupervisorHash = await bcrypt.hash(warehouseSupervisorPassword, warehouseSupervisorSalt);
   const warehouseSupervisor = await User.create({ 
@@ -106,7 +94,7 @@ async function seed() {
   });
   credentials.push({ email: warehouseSupervisor.email, password: warehouseSupervisorPassword, role: 'warehouse_supervisor', name: 'Michael Chen' });
 
-  const logisticAdminPassword = generateRandomPassword();
+  const logisticAdminPassword = FIXED_PASSWORDS.logistic_admin;
   const logisticAdminSalt = await bcrypt.genSalt(10);
   const logisticAdminHash = await bcrypt.hash(logisticAdminPassword, logisticAdminSalt);
   const logisticAdmin = await User.create({ 
@@ -118,7 +106,7 @@ async function seed() {
   });
   credentials.push({ email: logisticAdmin.email, password: logisticAdminPassword, role: 'logistic_admin', name: 'Emma Dubois' });
 
-  const preparateurPassword = generateRandomPassword();
+  const preparateurPassword = FIXED_PASSWORDS['preparateur commend'];
   const preparateurSalt = await bcrypt.genSalt(10);
   const preparateurHash = await bcrypt.hash(preparateurPassword, preparateurSalt);
   const preparateur = await User.create({ 
@@ -130,7 +118,7 @@ async function seed() {
   });
   credentials.push({ email: preparateur.email, password: preparateurPassword, role: 'preparateur commend', name: 'Jean Martin' });
 
-  const agentReceptionPassword = generateRandomPassword();
+  const agentReceptionPassword = FIXED_PASSWORDS['agent de reception'];
   const agentReceptionSalt = await bcrypt.genSalt(10);
   const agentReceptionHash = await bcrypt.hash(agentReceptionPassword, agentReceptionSalt);
   const agentReception = await User.create({ 
@@ -288,7 +276,7 @@ async function seed() {
 
 ## Test User Credentials
 
-**⚠️ IMPORTANT: Each user has a UNIQUE random password. Save these credentials securely!**
+**✅ FIXED PASSWORDS: All users have fixed passwords for easy development/testing.**
 
 ${credentials.map((cred, index) => {
   const roleNames: Record<string, string> = {
@@ -325,11 +313,12 @@ ${credentials.map((cred, index) => {
 
 ## Notes
 
-- All passwords are randomly generated and hashed using bcrypt
+- All passwords are **FIXED** (same every time) for easy development/testing
+- Passwords are hashed using bcrypt before storage
 - All emails must use the \`@stocksync.com\` domain
 - The seed script will clear existing data and create fresh test users
-- **Each time you run the seed script, new random passwords will be generated**
-- **Save this file after running the seed script to keep track of passwords**
+- **Passwords remain the same each time you run the seed script**
+- **In production, change these passwords or implement proper password reset flows**
 
 ---
 *Generated on: ${new Date().toISOString()}*
@@ -341,7 +330,7 @@ ${credentials.map((cred, index) => {
 
   // Console output
   console.log('\n=== Seed Complete ===');
-  console.log('Test users created with UNIQUE random passwords:');
+  console.log('Test users created with FIXED passwords (for development/testing):');
   console.log('');
   credentials.forEach((cred, index) => {
     console.log(`${index + 1}. ${cred.name} (${cred.role})`);
@@ -359,8 +348,8 @@ ${credentials.map((cred, index) => {
   console.log(`- Transfers: 2`);
   console.log(`- Alerts: 2`);
   console.log('');
-  console.log('⚠️  IMPORTANT: Credentials saved to CREDENTIALS.md');
-  console.log('⚠️  Save these passwords - they are randomly generated!');
+  console.log('✅ Credentials saved to CREDENTIALS.md');
+  console.log('✅ Passwords are FIXED - same every time you run the seed script');
   console.log('====================\n');
   
   process.exit(0);
