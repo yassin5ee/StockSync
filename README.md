@@ -72,7 +72,7 @@ Un système de gestion d'entrepôt complet construit avec React, Node.js, Expres
 - **Visualisations** : Graphiques et statistiques sur les mouvements de stock
 - **Rapports** : Génération de rapports sur les performances des entrepôts
 
-### 5. Gestion des Transfers
+### 5. Administration Logistique
 - **Suivi des entrepots** : Affichage des informations sur tous les entrepots
 - **Transferts inter-entrepôt** : Gestion des transferts de stock entre différents entrepôts
 - **Suivi des utillisateurs** : Suivi de tous les utilisateurs du site (derniere connexion ,statut...)
