@@ -94,7 +94,7 @@ Un système de gestion d'entrepôt complet construit avec React, Node.js, Expres
 - **Configuration** : Personnalisation des préférences utilisateur
 
 
-##  Prerequis
+##  Prérequis
 
 - Node.js (v16 or higher)
 - MongoDB (local or Atlas)
@@ -140,7 +140,7 @@ npm run seed
 
 This will create test users and populate the database with sample data. **Save the generated credentials from the console output!**
 
-##  Running the Application
+##  Execution de l'application
 
 ### Start Backend
 
