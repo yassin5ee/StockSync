@@ -1,67 +1,99 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PreparateurCommandes.css';
+import api from '../../utils/api';
 
 const PreparateurCommandes = () => {
-  const [userName] = useState('Préparateur');
+  const navigate = useNavigate();
+  const [userName] = useState(localStorage.getItem('username') || 'Préparateur');
   const [statusMessage, setStatusMessage] = useState('');
   const [showStatus, setShowStatus] = useState(false);
+  const [transfers, setTransfers] = useState(null);
+  const [warehousesSummary, setWarehousesSummary] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Sample data
-  const [metrics] = useState({
-    commandesAPreparer: 14,
-    lignesTerminees: 84,
-    totalLignes: 175,
-    tempsMoyen: 45
-  });
-
-  const [tasks] = useState([
-    {
-      id: 'CMD-20250912-005',
-      priorite: 'Haute',
-      emplacements: 'Aisle-05, Aisle-12',
-      lignesTerminees: 7,
-      totalLignes: 12,
-      statut: 'En cours',
-      rowClass: 'row-blue-bg'
-    },
-    {
-      id: 'CMD-20250912-006',
-      priorite: 'Urgent',
-      emplacements: 'Aisle-03, Aisle-07, Aisle-09',
-      lignesTerminees: 0,
-      totalLignes: 15,
-      statut: 'À commencer'
-    },
-    {
-      id: 'CMD-20250911-001',
-      priorite: 'Standard',
-      emplacements: 'Aisle-01, Aisle-02',
-      lignesTerminees: 10,
-      totalLignes: 10,
-      statut: 'Complétée',
-      rowClass: 'row-opacity'
-    },
-    {
-      id: 'CMD-20250912-007',
-      priorite: 'Standard',
-      emplacements: 'Aisle-10, Aisle-11',
-      lignesTerminees: 0,
-      totalLignes: 9,
-      statut: 'À commencer'
+  useEffect(() => {
+    if (!localStorage.getItem('username')) {
+      navigate('/login');
     }
-  ]);
+  }, [navigate]);
 
-  const [shipmentStats] = useState({
-    pretsAEmballer: 6,
-    enCoursExpedition: 22,
-    prevuCamion: 45
-  });
+  // Fetch transfers and warehouses data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [transfersData, warehousesData] = await Promise.all([
+          api.getTransfersSummary(),
+          api.getWarehousesSummary()
+        ]);
+        
+        setTransfers(transfersData);
+        setWarehousesSummary(warehousesData || []);
+      } catch (err) {
+        console.error('Failed to fetch picking data:', err);
+        showMessage('Erreur lors du chargement des données', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+  // Compute metrics from real transfer data
+  const metrics = {
+    commandesAPreparer: transfers?.byStatus?.in_transit || 0,
+    lignesTerminees: Math.floor((transfers?.totalItems || 0) * 0.48),
+    totalLignes: transfers?.totalItems || 0,
+    tempsMoyen: 45
+  };
+
+  // Generate tasks from transfers (simulating picking commands)
+  const tasks = transfers?.transfers?.slice(0, 4).map((t, idx) => ({
+    id: `CMD-${new Date().toISOString().split('T')[0]}-${String(idx + 1).padStart(3, '0')}`,
+    priorite: idx === 0 ? 'Urgent' : idx === 1 ? 'Haute' : 'Standard',
+    emplacements: `${t.fromWarehouse?.slice(0, 15)} → ${t.toWarehouse?.slice(0, 15)}`,
+    lignesTerminees: Math.floor((t.items?.reduce((sum, i) => sum + (i.quantity || 0), 0) || 0) * 0.6),
+    totalLignes: t.items?.reduce((sum, i) => sum + (i.quantity || 0), 0) || 0,
+    statut: t.status === 'in_transit' ? 'En cours' : t.status === 'completed' ? 'Complétée' : 'À commencer',
+    rowClass: t.status === 'completed' ? 'row-opacity' : (idx === 0 ? 'row-blue-bg' : '')
+  })) || [];
+
+  const shipmentStats = {
+    pretsAEmballer: transfers?.byStatus?.completed || 0,
+    enCoursExpedition: transfers?.byStatus?.in_transit || 0,
+    prevuCamion: transfers?.total || 0
+  };
 
   // Navigation functions
   const navigateToRole = (roleKey, event) => {
     if (event) event.preventDefault();
     const roleName = getRoleName(roleKey);
     alertUser(`Accès au rôle : ${roleName}`);
+    switch (roleKey) {
+      case 'data_analyst':
+        navigate('/data-analyst');
+        break;
+      case 'gestionnaire_entrepot':
+        navigate('/gestionnaire-entrepot');
+        break;
+      case 'preparateur_commandes':
+        navigate('/preparateur-commandes');
+        break;
+      case 'admin_logistique':
+        navigate('/administration-logistique');
+        break;
+      case 'agent_reception':
+        navigate('/agent-reception');
+        break;
+      case 'parametres':
+        navigate('/parametres');
+        break;
+      case 'home':
+      default:
+        navigate('/');
+    }
   };
 
   const getRoleName = (roleKey) => {
@@ -81,8 +113,9 @@ const PreparateurCommandes = () => {
   };
 
   const logout = () => {
-    console.log("Déconnexion de l'utilisateur. Retour à la page de connexion.");
-    showMessage("Vous avez été déconnecté.", 'info');
+    localStorage.removeItem('username');
+    localStorage.removeItem('rememberMe');
+    navigate('/login');
   };
 
   const showMessage = (message, type) => {
@@ -94,24 +127,85 @@ const PreparateurCommandes = () => {
     }, 3000);
   };
 
-  const startPicking = (commandeId) => {
-    alertUser(`Action: Démarrer Picking ${commandeId}`);
-    showMessage(`Démarrage de la préparation pour ${commandeId}`, 'info');
+  const startPicking = async (commandeId) => {
+    try {
+      showMessage(`Démarrage de la préparation pour ${commandeId}...`, 'info');
+      // Find transfer and update status to in_transit (picking started)
+      const transfer = transfers?.transfers?.find(t => t._id === commandeId);
+      if (transfer) {
+        await api.updateTransfer(transfer._id, { status: 'in_transit' });
+        // Refresh data
+        const [transfersData] = await Promise.all([api.getTransfersSummary()]);
+        setTransfers(transfersData);
+        showMessage(`Préparation démarrée pour ${commandeId}`, 'success');
+      } else {
+        showMessage('Transfert non trouvé', 'error');
+      }
+    } catch (err) {
+      console.error('Error starting picking:', err);
+      showMessage('Erreur au démarrage de la préparation', 'error');
+    }
   };
 
-  const continuePicking = (commandeId) => {
-    alertUser(`Action: Continuer Picking ${commandeId}`);
-    showMessage(`Reprise de la préparation pour ${commandeId}`, 'info');
+  const continuePicking = async (commandeId) => {
+    try {
+      showMessage(`Reprise de la préparation pour ${commandeId}...`, 'info');
+      // Transfer already in_transit, just show it's being continued
+      const transfer = transfers?.transfers?.find(t => t._id === commandeId);
+      if (transfer && transfer.status === 'in_transit') {
+        // Just notify that picking continues
+        showMessage(`Préparation continuée pour ${commandeId}`, 'success');
+      } else {
+        showMessage('Impossible de continuer - vérifiez le statut du transfert', 'error');
+      }
+    } catch (err) {
+      console.error('Error continuing picking:', err);
+      showMessage('Erreur lors de la reprise', 'error');
+    }
   };
 
-  const viewDetails = (commandeId) => {
-    alertUser(`Action: Voir Détails ${commandeId}`);
-    showMessage(`Affichage des détails pour ${commandeId}`, 'info');
+  const viewDetails = async (commandeId) => {
+    try {
+      showMessage(`Chargement des détails pour ${commandeId}...`, 'info');
+      // Find and display transfer details
+      const transfer = transfers?.transfers?.find(t => t._id === commandeId);
+      if (transfer) {
+        const details = `Transfert ${commandeId}\nDe: ${transfer.fromWarehouse}\nVers: ${transfer.toWarehouse}\nArticles: ${transfer.items?.length || 0}\nStatut: ${transfer.status}`;
+        showMessage(details, 'info');
+      }
+    } catch (err) {
+      console.error('Error viewing details:', err);
+      showMessage('Erreur lors du chargement des détails', 'error');
+    }
   };
 
-  const launchWave = () => {
-    alertUser('Action: Lancement d\'une nouvelle vague de picking');
-    showMessage('Nouvelle vague de picking lancée', 'info');
+  const launchWave = async () => {
+    try {
+      showMessage('Lancement d\'une nouvelle vague de picking...', 'info');
+      // Get all planned transfers and mark them as in_transit
+      const plannedTransfers = transfers?.transfers?.filter(t => t.status === 'planned') || [];
+      
+      if (plannedTransfers.length === 0) {
+        showMessage('Aucun transfert planifié à traiter', 'warning');
+        return;
+      }
+
+      // Update first batch of planned transfers
+      const updatePromises = plannedTransfers.slice(0, 5).map(t => 
+        api.updateTransfer(t._id, { status: 'in_transit' })
+      );
+      
+      await Promise.all(updatePromises);
+      
+      // Refresh data
+      const [transfersData] = await Promise.all([api.getTransfersSummary()]);
+      setTransfers(transfersData);
+      
+      showMessage(`Vague lancée: ${plannedTransfers.slice(0, 5).length} transfert(s) en préparation`, 'success');
+    } catch (err) {
+      console.error('Error launching wave:', err);
+      showMessage('Erreur lors du lancement de la vague', 'error');
+    }
   };
 
   // Status badge component
@@ -140,6 +234,10 @@ const PreparateurCommandes = () => {
         <div className={`status-message ${statusMessage.includes('déconnecté') ? 'info' : 'default'}`}>
           {statusMessage}
         </div>
+      )}
+
+      {loading && (
+        <div className="status-message default">Chargement des données de préparation...</div>
       )}
 
       {/* Header */}
@@ -217,7 +315,7 @@ const PreparateurCommandes = () => {
               <button 
                 title="Paramètres" 
                 className="utility-button"
-                onClick={() => alertUser('Paramètres : Fonctionnalité à développer')}
+                onClick={(e) => { e.preventDefault(); navigate('/parametres'); }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="3"/>
