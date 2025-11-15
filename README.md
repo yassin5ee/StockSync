@@ -2,7 +2,7 @@
 
 A comprehensive warehouse management system built with React, Node.js, Express, TypeScript, and MongoDB.
 
-## 🚀 Features
+##  Features
 
 - **Role-Based Access Control (RBAC)**: Multiple user roles with specific permissions
 - **Stock Management**: Track products, stock levels, entries, and exits
@@ -11,13 +11,13 @@ A comprehensive warehouse management system built with React, Node.js, Express, 
 - **JWT Authentication**: Secure authentication with token-based access
 - **Real-time Statistics**: Live updates from database
 
-## 📋 Prerequisites
+##  Prerequisites
 
 - Node.js (v16 or higher)
 - MongoDB (local or Atlas)
 - npm or yarn
 
-## 🛠️ Installation
+##  Installation
 
 ### 1. Clone the Repository
 
@@ -57,7 +57,7 @@ npm run seed
 
 This will create test users and populate the database with sample data. **Save the generated credentials from the console output!**
 
-## 🏃 Running the Application
+##  Running the Application
 
 ### Start Backend
 
@@ -77,7 +77,7 @@ npm run dev
 
 Frontend will run on `http://localhost:5173`
 
-## 👥 User Roles
+##  User Roles
 
 - **Admin**: Full access to all pages
 - **Logistic Admin**: Full access to all pages
@@ -86,7 +86,7 @@ Frontend will run on `http://localhost:5173`
 - **Préparateur Commandes**: Access to order preparation only
 - **Agent Réception**: Access to reception management only
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 StockSync_webapp/
@@ -105,29 +105,12 @@ StockSync_webapp/
 └── README.md
 ```
 
-## 🔐 Security Notes
+##  Security Notes
 
 - **Never commit** `.env` files or `CREDENTIALS.md`
 - JWT tokens are stored in localStorage
 - Passwords are hashed using bcrypt
 - All API routes are protected with authentication middleware
 
-## 📚 Documentation
 
-- `SETUP_INSTRUCTIONS.md` - Detailed setup guide
-- `STOCK_DATABASE_SETUP.md` - Stock management documentation
-- `STATISTICS_UPDATE.md` - Analytics implementation details
-- `JWT_IMPLEMENTATION.md` - Authentication details
-
-## 🧪 Testing
-
-After seeding the database, you can log in with any of the test users. Check the console output after running `npm run seed` for credentials.
-
-## 📝 License
-
-[Your License Here]
-
-## 👨‍💻 Author
-
-[Your Name]
 
