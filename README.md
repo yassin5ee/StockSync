@@ -105,7 +105,7 @@ Un système de gestion d'entrepôt complet construit avec React, Node.js, Expres
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/yassin5ee/StockSync.git
 cd StockSync_webapp
 ```
 
