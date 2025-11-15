@@ -1,6 +1,6 @@
-# StockSync - Warehouse Management System
+# StockSync - Système de Gestion d'Entrepôt
 
-A comprehensive warehouse management system built with React, Node.js, Express, TypeScript, and MongoDB.
+Un système de gestion d'entrepôt complet construit avec React, Node.js, Express, TypeScript, et MongoDB.
 
 ## Choix du Framework
 
@@ -53,11 +53,11 @@ A comprehensive warehouse management system built with React, Node.js, Express, 
 ### 2. Contrôle d'Accès Basé sur les Rôles (RBAC)
 - **6 rôles utilisateurs** :
   - **Admin** : Accès complet à toutes les fonctionnalités
-  - **Logistic Admin** : Accès complet à toutes les fonctionnalités
-  - **Data Analyst** : Accès uniquement au tableau de bord analytique
-  - **Warehouse Supervisor** : Accès à la gestion d'entrepôt uniquement
-  - **Préparateur Commandes** : Accès à la préparation de commandes uniquement
-  - **Agent Réception** : Accès à la gestion de réception uniquement
+  - **Administrateur logistique** : Accès complet à toutes les fonctionnalités
+  - **Analyste de données** : Accès uniquement au tableau de bord analytique
+  - **Gestionnaire d'entrepot** : Accès à la gestion d'entrepôt uniquement
+  - **Préparateur de Commandes** : Accès à la préparation de commandes uniquement
+  - **Agent de Réception** : Accès à la gestion de réception uniquement
 - **Protection des pages** : Routes frontend protégées selon le rôle de l'utilisateur
 - **Interface adaptative** : Navigation et fonctionnalités affichées selon les permissions
 
@@ -73,38 +73,28 @@ A comprehensive warehouse management system built with React, Node.js, Express, 
 - **Rapports** : Génération de rapports sur les performances des entrepôts
 
 ### 5. Gestion des Transfers
-- **Transferts inter-entrepôts** : Gestion des transferts de stock entre différents entrepôts
-- **Suivi des mouvements** : Historique complet des transferts effectués
-- **Validation** : Système de validation pour les transferts
+- **Suivi des entrepots** : Affichage des informations sur tous les entrepots
+- **Transferts inter-entrepôt** : Gestion des transferts de stock entre différents entrepôts
+- **Suivi des utillisateurs** : Suivi de tous les utilisateurs du site (derniere connexion ,statut...)
 
-### 6. Système d'Alertes
-- **Notifications** : Système d'alertes pour les stocks faibles, transferts en attente, etc.
-- **Gestion centralisée** : Interface pour visualiser et gérer toutes les alertes
-
-### 7. Préparation de Commandes
+### 6. Préparation de Commandes
 - **Interface dédiée** : Page spécifique pour les préparateurs de commandes
 - **Gestion des commandes** : Suivi et préparation des commandes clients
 
-### 8. Gestion de Réception
+### 7. Gestion de Réception
 - **Interface de réception** : Page dédiée aux agents de réception
 - **Enregistrement des arrivées** : Gestion des réceptions de marchandises
+
+### 8. Système d'Alertes
+- **Notifications** : Système d'alertes pour les stocks faibles, transferts en attente, etc.
+- **Gestion centralisée** : Interface pour visualiser et gérer toutes les alertes
 
 ### 9. Paramètres Utilisateur
 - **Gestion du profil** : Page de paramètres pour tous les utilisateurs
 - **Configuration** : Personnalisation des préférences utilisateur
 
 
-
-##  Features
-
-- **Role-Based Access Control (RBAC)**: Multiple user roles with specific permissions
-- **Stock Management**: Track products, stock levels, entries, and exits
-- **Warehouse Management**: Manage multiple warehouses with real-time statistics
-- **Analytics Dashboard**: Comprehensive analytics for data analysts
-- **JWT Authentication**: Secure authentication with token-based access
-- **Real-time Statistics**: Live updates from database
-
-##  Prerequisites
+##  Prerequis
 
 - Node.js (v16 or higher)
 - MongoDB (local or Atlas)
@@ -170,16 +160,8 @@ npm run dev
 
 Frontend will run on `http://localhost:5173`
 
-##  User Roles
 
-- **Admin**: Full access to all pages
-- **Logistic Admin**: Full access to all pages
-- **Data Analyst**: Access to analytics dashboard only
-- **Warehouse Supervisor**: Access to warehouse management only
-- **Préparateur Commandes**: Access to order preparation only
-- **Agent Réception**: Access to reception management only
-
-##  Project Structure
+##  Structure du projet
 
 ```
 StockSync_webapp/
@@ -198,12 +180,11 @@ StockSync_webapp/
 └── README.md
 ```
 
-##  Security Notes
+##  Notes de Sécurité
 
-- **Never commit** `.env` files or `CREDENTIALS.md`
-- JWT tokens are stored in localStorage
-- Passwords are hashed using bcrypt
-- All API routes are protected with authentication middleware
-
+- **Ne jamais commiter** les fichiers `.env` ou `CREDENTIALS.md`
+- Les jetons JWT sont stockés dans localStorage
+- Les mots de passe sont hashés en utilisant bcrypt
+- Toutes les routes API sont protégées par un middleware d'authentification
 
 
