@@ -1,0 +1,159 @@
+{
+	"info": {
+		"_postman_id": "9581ff96-9eac-45e6-a7e0-d1dc41af034c",
+		"name": "StockSync Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39390153"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"admin@stocksync.com\",\r\n  \"password\": \"Admin@StockSync2024!\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4000/api/users/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"api",
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "health check",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "users list",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/users",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "warehouse lists",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/warehouses",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"warehouses"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "tranfers list",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/transfers",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"transfers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "alerts list",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/alerts",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"alerts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "metrics list",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/analytics/metrics",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"analytics",
+						"metrics"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
