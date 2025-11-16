@@ -181,9 +181,6 @@ StockSync_webapp/
 ```
 
 ##  Notes de Sécurité
-
-- **Ne jamais commiter** les fichiers `.env` ou `CREDENTIALS.md`
-- Les jetons JWT sont stockés dans localStorage
 - Les mots de passe sont hashés en utilisant bcrypt
 - Toutes les routes API sont protégées par un middleware d'authentification
 
