@@ -121,7 +121,7 @@ Create a `.env` file in the `backend` directory:
 ```env
 MONGODB_URI=mongodb://localhost:27017/stocksync
 PORT=4000
-JWT_SECRET=your_strong_random_secret_key_here
+JWT_SECRET=your strong generated jwt secret
 ```
 
 ### 3. Frontend Setup
