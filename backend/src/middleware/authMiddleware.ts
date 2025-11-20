@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import User from '../models/user';
 import { extractTokenFromHeader, verifyToken } from '../utils/jwt';
 
-// Extend Express Request type to include user
+// Add a "user" field to Express Request so TS doesn't complain
 declare global {
   namespace Express {
     interface Request {
@@ -19,9 +19,8 @@ declare global {
 }
 
 /**
- * Authentication middleware to extract user from JWT token
- * Expects JWT token in Authorization header: Bearer <token>
- * Falls back to legacy userId for backward compatibility
+ * Small middleware that checks if a user is authenticated.
+ * If a valid JWT is found, we attach the user info to req.user.
  */
 export const authMiddleware = async (
   req: Request,
@@ -29,7 +28,7 @@ export const authMiddleware = async (
   next: NextFunction
 ) => {
   try {
-    // Skip auth middleware for login, refresh, and health check endpoints
+    // These routes must stay open — no login required
     if (
       req.path === '/api/users/login' ||
       req.path === '/api/users/refresh' ||
@@ -38,12 +37,12 @@ export const authMiddleware = async (
       return next();
     }
 
-    // Try to extract JWT token from Authorization header
+    // Try to read the Authorization header (expected format: Bearer token)
     const authHeader = req.get('Authorization');
     const token = extractTokenFromHeader(authHeader);
 
     if (token) {
-      // Verify JWT token
+      // Check if the token is valid and not expired
       const decoded = verifyToken(token);
       
       if (!decoded) {
@@ -53,7 +52,7 @@ export const authMiddleware = async (
         });
       }
 
-      // Fetch user from database to ensure they still exist
+      // Make sure the user still exists in the database
       const user = await User.findById(decoded.id).lean();
       if (!user) {
         return res.status(401).json({ 
@@ -62,7 +61,7 @@ export const authMiddleware = async (
         });
       }
 
-      // Attach user to request
+      // Put user data on the request so the routes know who's calling
       req.user = {
         id: user._id?.toString() || '',
         firstName: user.firstName,
@@ -75,19 +74,18 @@ export const authMiddleware = async (
       return next();
     }
 
-    // Fallback to legacy userId-based auth (for backward compatibility)
+    // If no JWT was sent, we fall back to the old system (if used)
     const userId =
       req.query.userId ||
       req.get('X-User-ID') ||
       req.body.userId;
-
+    // If there's no authentication info at all, just continue
+    // (useful for public endpoints)
     if (!userId) {
-      // If no authentication provided, continue without user context
-      // (useful for public endpoints)
       return next();
     }
 
-    // Fetch user from database
+    // Load the user from the database using the fallback ID
     const user = await User.findById(userId).lean();
     if (!user) {
       return res
@@ -95,7 +93,7 @@ export const authMiddleware = async (
         .json({ success: false, error: 'User not found' });
     }
 
-    // Attach user to request
+    // Attach the user to req, same as the JWT case
     req.user = {
       id: user._id?.toString() || '',
       firstName: user.firstName,
@@ -114,18 +112,17 @@ export const authMiddleware = async (
   }
 };
 
-/**
- * Helper function to build warehouse filter
- * - Admin can see all warehouses
- * - Other roles may have specific warehouse access (to be implemented if needed)
- */
+  /**
+   * Build a MongoDB filter for warehouse queries depending on the user's role.
+   * Right now admins and non-admins see everything, but this can be expanded later.
+   */
 export const getWarehouseFilter = (req: Request) => {
   if (!req.user) {
-    // No user context - no filter
+    // admin → no restrictions
     return {};
   }
 
-  // Admin can see all warehouses
+  // other roles → currently unrestricted
   if (isAdmin(req)) {
     return {};
   }
@@ -154,7 +151,7 @@ export const getTransferFilter = (req: Request) => {
 };
 
 /**
- * Check if user has admin role
+ * Utility to quickly check if the current user is admin.
  */
 export const isAdmin = (req: Request): boolean => {
   if (!req.user) return false;
