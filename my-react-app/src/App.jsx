@@ -18,10 +18,15 @@ function App() {
       <div className="App">
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={<Accueil />} />
           <Route path="/login" element={<Login />} />
           
           {/* Application routes with role-based access control */}
+          {/* Home page - accessible to all authenticated users */}
+          <Route path="/" element={
+            <ProtectedRoute allowedRoles={['admin', 'logistic_admin', 'data_analyst', 'warehouse_supervisor', 'preparateur commend', 'agent de reception']}>
+              <Accueil />
+            </ProtectedRoute>
+          } />
           <Route path="/home" element={
             <ProtectedRoute allowedRoles={['admin', 'logistic_admin', 'data_analyst', 'warehouse_supervisor', 'preparateur commend', 'agent de reception']}>
               <Accueil />

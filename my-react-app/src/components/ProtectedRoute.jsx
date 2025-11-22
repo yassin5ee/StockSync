@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { getCurrentUser, getUserRole, isAdmin } from '../utils/authContext';
+import { getCurrentUser, getUserRole, isAdminOrLogisticAdmin } from '../utils/authContext';
 
 /**
  * ProtectedRoute component that enforces role-based access control
@@ -18,8 +18,8 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
     return <Navigate to="/login" replace />;
   }
 
-  // Admin and logistic_admin can access all pages
-  if (isAdmin() || userRole === 'logistic_admin') {
+  // Admin and logistic_admin can access all pages (bypass allowedRoles check)
+  if (isAdminOrLogisticAdmin()) {
     return children;
   }
 
@@ -38,15 +38,15 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
  */
 function getDefaultPageForRole(role) {
   const rolePageMap = {
-    'admin': '/administration-logistique',
-    'logistic_admin': '/administration-logistique',
+    'admin': '/home',
+    'logistic_admin': '/home',
     'data_analyst': '/data-analyst',
     'warehouse_supervisor': '/gestionnaire-entrepot',
     'preparateur commend': '/preparateur-commandes',
     'agent de reception': '/agent-reception'
   };
 
-  return rolePageMap[role] || '/';
+  return rolePageMap[role] || '/home';
 }
 
 export default ProtectedRoute;

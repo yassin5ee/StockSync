@@ -39,6 +39,15 @@ export function isAdmin() {
   return role === 'admin';
 }
 
+export function isLogisticAdmin() {
+  const role = getUserRole();
+  return role === 'logistic_admin';
+}
+
+export function isAdminOrLogisticAdmin() {
+  return isAdmin() || isLogisticAdmin();
+}
+
 export function isAgent() {
   const role = getUserRole();
   return role === 'agent de reception' || role === 'preparateur commend';

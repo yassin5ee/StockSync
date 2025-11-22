@@ -19,24 +19,8 @@ const Accueil = () => {
     
     setUsername(user.name || user.username || 'Utilisateur');
     
-    // Automatically redirect to role-specific page
-    const userRole = getUserRole();
-    const rolePageMap = {
-      'admin': '/administration-logistique',
-      'logistic_admin': '/administration-logistique',
-      'data_analyst': '/data-analyst',
-      'warehouse_supervisor': '/gestionnaire-entrepot',
-      'preparateur commend': '/preparateur-commandes',
-      'agent de reception': '/agent-reception'
-    };
-    
-    const defaultPage = rolePageMap[userRole];
-    if (defaultPage && defaultPage !== '/home') {
-      // Small delay to show the home page briefly
-      setTimeout(() => {
-        navigate(defaultPage);
-      }, 500);
-    }
+    // No auto-redirect - allow users to stay on the home page
+    // Users can navigate to their role-specific pages using the navigation menu
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
