@@ -8,24 +8,80 @@ body {
   padding: 0;
 }
 
-/* Style pour les cartes de KPI */
+/* Style pour les cartes de KPI - Enhanced */
 .kpi-card {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
-  transition: all 0.2s ease-in-out;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: scaleInBounce 0.6s ease-out;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.kpi-card:hover::before {
+  left: 100%;
 }
 
 .kpi-card:hover {
-  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1), 0 4px 6px -2px rgba(59, 130, 246, 0.05);
+  box-shadow: 0 20px 40px -12px rgba(59, 130, 246, 0.25), 
+              0 8px 16px -4px rgba(59, 130, 246, 0.15);
+  transform: translateY(-8px) scale(1.03) rotate(1deg);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(249, 250, 251, 1) 100%);
 }
 
-/* Style de la zone de graphique */
+/* Style de la zone de graphique - Enhanced */
 .chart-area {
   min-height: 400px;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.95) 100%);
+  border: 1px solid rgba(229, 231, 235, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: fadeInUp 0.8s ease-out;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.chart-area::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.05) 0%,
+    transparent 70%
+  );
+  animation: rotate 20s linear infinite;
+  pointer-events: none;
+}
+
+.chart-area:hover {
+  box-shadow: 0 20px 60px -12px rgba(59, 130, 246, 0.2),
+              0 8px 24px -4px rgba(0, 0, 0, 0.08);
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 /* Reset des styles par défaut */
@@ -43,21 +99,51 @@ body {
 }
 
 .header {
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: 1rem;
+  animation: slideInFromTop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
 }
 
 .main {
   flex-grow: 1;
   padding: 2rem;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+  position: relative;
 }
 
 .footer {
-  background-color: #fff;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   text-align: center;
   padding: 1rem;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid rgba(221, 221, 221, 0.5);
+  animation: slideInFromBottom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 .App {
   text-align: center;

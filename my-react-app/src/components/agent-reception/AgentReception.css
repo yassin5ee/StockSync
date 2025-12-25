@@ -6,6 +6,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  animation: fadeIn 0.5s ease-in;
 }
 
 /* Inclure tous les styles de header/footer de PreparateurCommandes */
@@ -52,12 +53,70 @@
 
 /* Tab Content */
 .tab-content {
-  animation: fadeIn 0.3s ease-in;
+  animation: fadeIn 0.4s ease-in;
+}
+
+.metric-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: scaleIn 0.5s ease-out both;
+}
+
+.metric-card:nth-child(1) { animation-delay: 0.1s; }
+.metric-card:nth-child(2) { animation-delay: 0.2s; }
+.metric-card:nth-child(3) { animation-delay: 0.3s; }
+.metric-card:nth-child(4) { animation-delay: 0.4s; }
+
+.metric-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.12);
+}
+
+.livraison-item,
+.reception-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideInFromLeft 0.4s ease-out both;
+}
+
+.livraison-item:nth-child(1),
+.reception-item:nth-child(1) { animation-delay: 0.1s; }
+.livraison-item:nth-child(2),
+.reception-item:nth-child(2) { animation-delay: 0.2s; }
+.livraison-item:nth-child(3),
+.reception-item:nth-child(3) { animation-delay: 0.3s; }
+
+.livraison-item:hover,
+.reception-item:hover {
+  transform: translateX(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.quai-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: scaleIn 0.5s ease-out both;
+}
+
+.quai-card:nth-child(1) { animation-delay: 0.1s; }
+.quai-card:nth-child(2) { animation-delay: 0.2s; }
+.quai-card:nth-child(3) { animation-delay: 0.3s; }
+
+.quai-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.12);
 }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInFromLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* Metrics Grid */
@@ -603,7 +662,7 @@
   font-weight: 600;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 50;
-  animation: slideIn 0.3s ease-out;
+  animation: slideInFromRight 0.4s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
 }
 
 .status-message.info {
@@ -622,9 +681,13 @@
   background-color: #d97706;
 }
 
-@keyframes slideIn {
+@keyframes slideInFromRight {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateX(100%); }
 }
 
 /* Responsive Design */

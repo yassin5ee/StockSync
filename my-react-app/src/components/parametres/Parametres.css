@@ -6,10 +6,10 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  animation: fadeIn 0.5s ease-in;
 }
 
-/* Inclure tous les styles de header/footer de base */
-/* Les mêmes que dans les composants précédents */
+
 
 /* Main Content */
 .settings-main {
@@ -92,12 +92,64 @@
 }
 
 .settings-section {
-  animation: fadeIn 0.3s ease-in;
+  animation: fadeIn 0.4s ease-in;
+}
+
+.setting-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: scaleIn 0.5s ease-out both;
+}
+
+.setting-card:nth-child(1) { animation-delay: 0.1s; }
+.setting-card:nth-child(2) { animation-delay: 0.2s; }
+.setting-card:nth-child(3) { animation-delay: 0.3s; }
+
+.setting-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.12);
+}
+
+.help-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: scaleIn 0.5s ease-out both;
+}
+
+.help-card:nth-child(1) { animation-delay: 0.1s; }
+.help-card:nth-child(2) { animation-delay: 0.2s; }
+.help-card:nth-child(3) { animation-delay: 0.3s; }
+
+.help-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.12);
+}
+
+.nav-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideInFromLeft 0.4s ease-out both;
+}
+
+.nav-item:nth-child(1) { animation-delay: 0.1s; }
+.nav-item:nth-child(2) { animation-delay: 0.2s; }
+.nav-item:nth-child(3) { animation-delay: 0.3s; }
+.nav-item:nth-child(4) { animation-delay: 0.4s; }
+
+.nav-item:hover {
+  transform: translateX(4px);
 }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInFromLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .section-header {
@@ -572,7 +624,7 @@
   font-weight: 600;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 50;
-  animation: slideIn 0.3s ease-out;
+  animation: slideInFromRight 0.4s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
 }
 
 .status-message.info {
@@ -591,9 +643,13 @@
   background-color: #d97706;
 }
 
-@keyframes slideIn {
+@keyframes slideInFromRight {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateX(100%); }
 }
 
 /* Responsive Design */
