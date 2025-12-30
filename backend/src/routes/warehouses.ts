@@ -14,7 +14,6 @@ router.get('/:id', async (req: Request, res: Response) => {
   const w = await Warehouse.findById(req.params.id).lean();
   if (!w) return res.status(404).json({ success: false, error: { message: 'Not found' } });
   
-  // Check access permission
   if (req.user && !isAdmin(req) && !canAccessWarehouse(req, w.name)) {
     return res.status(403).json({ success: false, error: { message: 'Access denied' } });
   }
@@ -23,7 +22,6 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 router.post('/', async (req: Request, res: Response) => {
-  // Only admins can create warehouses
   if (req.user && !isAdmin(req)) {
     return res.status(403).json({ success: false, error: { message: 'Only admins can create warehouses' } });
   }
@@ -36,7 +34,6 @@ router.post('/', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   
-  // Check access permission
   const warehouse = await Warehouse.findById(id).lean();
   if (!warehouse) {
     return res.status(404).json({ success: false, error: { message: 'Not found' } });
@@ -59,7 +56,6 @@ router.put('/:id', async (req: Request, res: Response) => {
 router.delete('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   
-  // Check access permission
   const warehouse = await Warehouse.findById(id).lean();
   if (!warehouse) {
     return res.status(404).json({ success: false, error: { message: 'Not found' } });

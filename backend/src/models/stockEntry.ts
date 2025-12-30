@@ -16,7 +16,7 @@ const StockEntrySchema = new Schema<IStockEntry>({
   user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   quantity: { type: Number, required: true },
   supplier: { type: String },
-  document_url: { type: String }, // invoice, purchase order, etc.
+  document_url: { type: String },
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 

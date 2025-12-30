@@ -19,7 +19,6 @@ const AgentReception = () => {
     }
   }, [navigate]);
 
-  // Fetch transfers and warehouses data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,7 +41,6 @@ const AgentReception = () => {
     fetchData();
   }, []);
 
-  // Mock metrics based on real transfer data
   const receptionMetrics = {
     livraisonsAttendues: transfers?.byStatus?.planned || 0,
     palettesReceptionnees: transfers?.byStatus?.in_transit || 0,
@@ -50,7 +48,6 @@ const AgentReception = () => {
     tauxQualite: '99.4%'
   };
 
-  // Mock receptions based on transfers
   const livraisonsAttendues = transfers?.transfers?.slice(0, 4).map((t, idx) => ({
     id: `LIV-${new Date().toISOString().split('T')[0]}-${String(idx + 1).padStart(3, '0')}`,
     transferId: t._id,
@@ -86,10 +83,9 @@ const AgentReception = () => {
   const alertesReception = [
     { id: 1, type: 'qualite', severite: 'moyenne', message: `Carton potentiellement endommagé - ${transfers?.transfers?.[0]?.fromWarehouse}`, produit: transfers?.transfers?.[0]?.items?.[0]?.sku || 'SKU-000', timestamp: new Date().toLocaleString('fr-FR') },
     { id: 2, type: 'quantite', severite: 'faible', message: 'Écart quantité possible sur transfert', produit: transfers?.transfers?.[1]?.items?.[0]?.sku || 'SKU-000', timestamp: new Date().toLocaleString('fr-FR') },
-    { id: 3, type: 'document', severite: 'elevee', message: 'Bon de livraison à vérifier', produit: null, timestamp: new Date().toLocaleString('fr-FR') }
+    { id: 3, type: 'document', severite: 'elevee', message: 'Bon de livraison à vérifier', produit: null,     timestamp: new Date().toLocaleString('fr-FR') }
   ];
 
-  // Fonctions de navigation
   const navigateToRole = (roleKey, event) => {
     if (event) event.preventDefault();
     const roleName = getRoleName(roleKey);
@@ -153,7 +149,6 @@ const AgentReception = () => {
   const demarrerReception = async (livraisonId) => {
     try {
       showMessage(`Démarrage réception pour ${livraisonId}...`, 'info');
-      // Find transfer by reference and update status to in_transit
       const transfer = transfers?.transfers?.find(t => t._id === livraisonId);
       if (transfer) {
         await api.updateTransfer(transfer._id, { status: 'in_transit' });
@@ -171,7 +166,6 @@ const AgentReception = () => {
   const scannerProduit = async (receptionId) => {
     try {
       showMessage(`Produit scanné - Réception ${receptionId}`, 'info');
-      // This would typically increment a scanned count, for now just show message
     } catch (err) {
       console.error('Error scanning product:', err);
       showMessage('Erreur lors du scan du produit', 'error');
@@ -181,7 +175,6 @@ const AgentReception = () => {
   const terminerReception = async (receptionId) => {
     try {
       showMessage(`Finalisation réception ${receptionId}...`, 'info');
-      // Find transfer by livraisonId and update status to completed
       const transfer = receptionsEnCours.find(r => r.id === receptionId);
       if (transfer && transfer.livraisonId) {
         await api.updateTransfer(transfer.livraisonId, { status: 'completed' });
@@ -199,7 +192,6 @@ const AgentReception = () => {
   const signalerProbleme = async (livraisonId, type) => {
     try {
       showMessage(`Problème ${type} signalé pour ${livraisonId}...`, 'warning');
-      // Create an alert
       const alertPayload = {
         type: 'reception_problem',
         severity: type === 'retard' ? 'medium' : 'high',
@@ -218,7 +210,6 @@ const AgentReception = () => {
   const assignerQuai = async (quaiId, livraisonId) => {
     try {
       showMessage(`Assignation du quai ${quaiId}...`, 'info');
-      // Create an alert to track quai assignment
       const alertPayload = {
         type: 'quai_assignment',
         severity: 'low',

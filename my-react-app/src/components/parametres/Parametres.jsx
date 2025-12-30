@@ -10,11 +10,9 @@ const Parametres = () => {
   const [activeSection, setActiveSection] = useState('profil');
   const [loading, setLoading] = useState(true);
   
-  // Get user from localStorage
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const userName = currentUser.name || 'Admin';
 
-  // Config data from backend
   const [configData, setConfigData] = useState(null);
 
   useEffect(() => {
@@ -23,7 +21,6 @@ const Parametres = () => {
       return;
     }
     
-    // Fetch config from backend
     const fetchConfig = async () => {
       try {
         setLoading(true);
@@ -40,14 +37,13 @@ const Parametres = () => {
     fetchConfig();
   }, [navigate]);
 
-  // Données du profil utilisateur (from localStorage)
   const [userProfile, setUserProfile] = useState({
     nom: currentUser.name?.split(' ')[1] || 'User',
     prenom: currentUser.name?.split(' ')[0] || 'Admin',
     email: currentUser.email || 'user@stocksync.com',
     telephone: '+33 6 12 34 56 78',
     role: currentUser.role || 'Admin',
-    entrepot: 'N/A', // Warehouses are no longer part of user model
+    entrepot: 'N/A',
     dateEmbauche: '2023-03-15',
     notificationsEmail: true,
     notificationsSMS: false,
@@ -66,7 +62,6 @@ const Parametres = () => {
     ordreColonnes: 'defaut'
   });
 
-  // Paramètres système (from backend config)
   const [systemSettings, setSystemSettings] = useState({
     lowStockThreshold: configData?.lowStockThreshold || 50,
     performanceAlertThreshold: configData?.performanceAlertThreshold || 90,
@@ -160,7 +155,6 @@ const Parametres = () => {
       const newSettings = { ...systemSettings, [field]: value };
       setSystemSettings(newSettings);
       
-      // Save to backend
       await api.updateConfig(newSettings);
       showMessage(`Paramètre mis à jour: ${field}`, 'success');
     } catch (err) {

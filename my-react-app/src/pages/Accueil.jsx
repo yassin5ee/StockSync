@@ -18,10 +18,6 @@ const Accueil = () => {
     }
     
     setUsername(user.name || user.username || 'Utilisateur');
-    
-    // No auto-redirect - allow users to stay on the home page
-    // Users can navigate to their role-specific pages using the navigation menu
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const logout = () => {
@@ -33,7 +29,6 @@ const Accueil = () => {
     if (event) event.preventDefault();
     const roleName = getRoleName(roleKey);
     showMessage(`Accès au rôle : ${roleName}`, 'info');
-    // navigate to the matching route for the selected role
     switch (roleKey) {
       case 'data_analyst':
         navigate('/data-analyst');

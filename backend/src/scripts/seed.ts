@@ -25,7 +25,6 @@ async function seed() {
   await mongoose.connect(MONGODB_URI);
   console.log('Connected to DB for seeding');
 
-  // Clear collections (careful in production)
   await Warehouse.deleteMany({});
   await User.deleteMany({});
   await Transfer.deleteMany({});
@@ -40,9 +39,6 @@ async function seed() {
   const wh3 = await Warehouse.create({ name: 'Entrepôt Marseille Sud', location: 'Marseille, France', capacity: 6000, used: 4230, status: 'maintenance', manager: 'Julie Petit', productsCount: 1560 });
   const wh4 = await Warehouse.create({ name: 'Entrepôt Bordeaux Ouest', location: 'Bordeaux, France', capacity: 5000, used: 2980, status: 'operational', manager: 'Marc Dubois', productsCount: 980 });
 
-  // Fixed strong passwords for development/testing (same passwords every time)
-  // These are strong passwords that remain consistent for easy testing
-  // In production, these should be changed or use proper password reset flows
   const FIXED_PASSWORDS = {
     admin: 'Admin@StockSync2024!',
     data_analyst: 'DataAnalyst@2024!',
@@ -52,12 +48,8 @@ async function seed() {
     'agent de reception': 'Reception@Agent2024!'
   };
 
-  // Store credentials for output
   const credentials: Array<{email: string, password: string, role: string, name: string}> = [];
 
-  // Create users with all required roles
-  // All emails must be @stocksync.com
-  // Each user gets a fixed password for easy testing
   const adminPassword = FIXED_PASSWORDS.admin;
   const adminSalt = await bcrypt.genSalt(10);
   const adminHash = await bcrypt.hash(adminPassword, adminSalt);
@@ -134,9 +126,8 @@ async function seed() {
   await Transfer.create({ fromWarehouse: wh2.name, toWarehouse: wh3.name, items: [{ sku: 'SKU456', quantity: 85 }], status: 'planned' });
 
   await Alert.create({ type: 'stock', severity: 'medium', message: 'Stock faible pour produit SKU-7842 à Paris Nord', warehouse: wh1.name });
-  await Alert.create({ type: 'performance', severity: 'low', message: 'Performance picking en baisse à Lyon Est', warehouse: wh2.name });
+  await Alert.create({ type: 'performance', severity: 'low', message: 'Performance picking en baisse à Lyon Est', warehouse: wh2.name   });
 
-  // Create Products
   console.log('Creating products...');
   const products = [
     { name: 'Ordinateur Portable HP', sku: 'LAP-HP-001', category: 'Électronique', unit: 'unité', min_quantity: 10 },
@@ -168,7 +159,6 @@ async function seed() {
   }
   console.log(`Created ${createdProducts.length} products`);
 
-  // Create Stock (quantity per product per warehouse)
   console.log('Creating stock records...');
   const warehouses = [wh1, wh2, wh3, wh4];
   const stockRecords = [];
@@ -176,7 +166,6 @@ async function seed() {
   for (const warehouse of warehouses) {
     for (let i = 0; i < createdProducts.length; i++) {
       const product = createdProducts[i];
-      // Random quantity between 0 and 500, but ensure some products have stock
       const quantity = i < 15 ? Math.floor(Math.random() * 400) + 50 : Math.floor(Math.random() * 100);
       
       const stock = await Stock.create({
@@ -189,17 +178,14 @@ async function seed() {
   }
   console.log(`Created ${stockRecords.length} stock records`);
 
-  // Create Stock Entries (incoming stock)
   console.log('Creating stock entries...');
   const stockEntries = [];
   const suppliers = ['Fournisseur TechPro', 'Distributeur Electronix', 'Grossiste Digital', 'Importateur Global', 'Fournisseur Premium'];
   
-  // Create entries for the last 30 days
   for (let day = 0; day < 30; day++) {
     const entryDate = new Date();
     entryDate.setDate(entryDate.getDate() - day);
     
-    // 2-5 entries per day
     const entriesPerDay = Math.floor(Math.random() * 4) + 2;
     
     for (let i = 0; i < entriesPerDay; i++) {
@@ -223,17 +209,14 @@ async function seed() {
   }
   console.log(`Created ${stockEntries.length} stock entries`);
 
-  // Create Stock Exits (outgoing stock)
   console.log('Creating stock exits...');
   const stockExits = [];
   const destinations = ['Client ABC', 'Client XYZ', 'Boutique Paris', 'E-commerce', 'Revendeur Lyon', 'Dépôt Marseille'];
   
-  // Create exits for the last 30 days
   for (let day = 0; day < 30; day++) {
     const exitDate = new Date();
     exitDate.setDate(exitDate.getDate() - day);
     
-    // 1-4 exits per day
     const exitsPerDay = Math.floor(Math.random() * 4) + 1;
     
     for (let i = 0; i < exitsPerDay; i++) {
@@ -257,7 +240,6 @@ async function seed() {
   }
   console.log(`Created ${stockExits.length} stock exits`);
 
-  // Generate credentials file
   const credentialsContent = `# StockSync - Test User Credentials
 
 ## Database Setup
@@ -324,11 +306,9 @@ ${credentials.map((cred, index) => {
 *Generated on: ${new Date().toISOString()}*
 `;
 
-  // Save credentials to file
   const credentialsPath = path.join(process.cwd(), '..', 'CREDENTIALS.md');
   fs.writeFileSync(credentialsPath, credentialsContent, 'utf-8');
 
-  // Console output
   console.log('\n=== Seed Complete ===');
   console.log('Test users created with FIXED passwords (for development/testing):');
   console.log('');

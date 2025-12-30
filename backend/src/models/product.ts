@@ -13,8 +13,8 @@ const ProductSchema = new Schema<IProduct>({
   name: { type: String, required: true },
   sku: { type: String, required: true, unique: true },
   category: { type: String },
-  unit: { type: String, required: true, default: 'unité' }, // kg, unité, carton...
-  min_quantity: { type: Number, default: 0 }, // for notifications
+  unit: { type: String, required: true, default: 'unité' },
+  min_quantity: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 

@@ -11,8 +11,10 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 router.post('/', async (req: Request, res: Response) => {
-  // Only admins and reception agents can create transfers
-  if (req.user && !isAdmin(req) && req.user.role !== 'agent de reception') {
+  if (req.user && !isAdmin(req) && 
+      req.user.role !== 'agent de reception' && 
+      req.user.role !== 'warehouse_supervisor' &&
+      req.user.role !== 'logistic_admin') {
     return res.status(403).json({ success: false, error: { message: 'Insufficient permissions' } });
   }
   
@@ -34,12 +36,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     return res.status(404).json({ success: false, error: { message: 'Not found' } });
   }
   
-  // Check if user can access this transfer's warehouses
-  // For now, all authenticated users can access all transfers
-  // This can be customized based on role requirements
   if (req.user && !isAdmin(req)) {
-    // All non-admin users can access transfers for now
-    // This can be customized if warehouse-specific access is needed
   }
   
   const payload = req.body;
@@ -59,7 +56,6 @@ router.delete('/:id', async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, error: { message: 'Transfer ID is required' } });
   }
   
-  // Only admins can delete transfers
   if (req.user && !isAdmin(req)) {
     return res.status(403).json({ success: false, error: { message: 'Only admins can delete transfers' } });
   }

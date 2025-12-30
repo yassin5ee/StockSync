@@ -1,49 +1,31 @@
-const API = import.meta.env.VITE_API_URL || '';
+const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:4000';
 
-/**
- * Helper to get access token from localStorage
- */
 function getAccessToken() {
   return localStorage.getItem('accessToken');
 }
 
-/**
- * Helper to get refresh token from localStorage
- */
 function getRefreshToken() {
   return localStorage.getItem('refreshToken');
 }
 
-/**
- * Helper to store tokens in localStorage
- */
 function setTokens(accessToken, refreshToken) {
   if (accessToken) localStorage.setItem('accessToken', accessToken);
   if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
 }
 
-/**
- * Helper to clear tokens from localStorage
- */
 function clearTokens() {
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
 }
 
-/**
- * Check if endpoint is an authentication endpoint
- */
 function isAuthEndpoint(path) {
   return (
     path === '/api/users/login' ||
     path === '/api/users/refresh' ||
-    path === '/api/users' // creating a user (register/admin create)
+    path === '/api/users' 
   );
 }
 
-/**
- * Refresh access token using refresh token
- */
 async function refreshAccessToken() {
   const refreshToken = getRefreshToken();
   if (!refreshToken) {
@@ -69,7 +51,6 @@ async function refreshAccessToken() {
     throw new Error('Invalid refresh response');
   } catch (error) {
     clearTokens();
-    // Redirect to login if refresh fails
     if (window.location.pathname !== '/login') {
       window.location.href = '/login';
     }
@@ -77,14 +58,10 @@ async function refreshAccessToken() {
   }
 }
 
-/**
- * Make authenticated fetch request with automatic token refresh
- */
 async function authenticatedFetch(path, opts = {}) {
   const isAuth = isAuthEndpoint(path);
   const headers = { ...opts.headers };
   
-  // Add Authorization header for non-auth endpoints
   if (!isAuth) {
     const token = getAccessToken();
     if (token) {
@@ -92,34 +69,42 @@ async function authenticatedFetch(path, opts = {}) {
     }
   }
 
-  // Ensure Content-Type is set for requests with body
   if (opts.body && !headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
   }
 
-  let res = await fetch(`${API}${path}`, {
-    ...opts,
-    headers
-  });
+  const fullUrl = `${API}${path}`;
+  console.log(`[API Request] ${opts.method || 'GET'} ${fullUrl}`);
 
-  // If token expired, try to refresh and retry once
-  if (res.status === 401 && !isAuth) {
-    try {
-      const newToken = await refreshAccessToken();
-      headers['Authorization'] = `Bearer ${newToken}`;
-      res = await fetch(`${API}${path}`, {
-        ...opts,
-        headers
-      });
-    } catch (refreshError) {
-      // Refresh failed, return original 401 response
+  try {
+    let res = await fetch(fullUrl, {
+      ...opts,
+      headers
+    });
+
+    if (res.status === 401 && !isAuth) {
+      try {
+        const newToken = await refreshAccessToken();
+        headers['Authorization'] = `Bearer ${newToken}`;
+        res = await fetch(fullUrl, {
+          ...opts,
+          headers
+        });
+      } catch (refreshError) {
+      }
     }
-  }
 
-  if (!res.ok) {
-    throw new Error(`API error ${res.status}`);
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => 'Unknown error');
+      console.error(`[API Error] ${res.status}: ${errorText}`);
+      throw new Error(`API error ${res.status}`);
+    }
+    return res.json();
+
+  } catch (error) {
+    console.error("[Network Error] Connection failed:", error);
+    throw error;
   }
-  return res.json();
 }
 
 async function fetchJson(path, opts = {}) {
@@ -190,7 +175,6 @@ export async function login(payload) {
   const j = await postJson('/api/users/login', payload);
   const userData = j.data;
   
-  // Store tokens
   if (userData.accessToken && userData.refreshToken) {
     setTokens(userData.accessToken, userData.refreshToken);
   }
@@ -237,6 +221,11 @@ export async function getStockStatistics() {
 
 export async function getStockByWarehouse(warehouseId) {
   const j = await fetchJson(`/api/analytics/stock/${warehouseId}`);
+  return j.data;
+}
+
+export async function getOrderVolume() {
+  const j = await fetchJson('/api/analytics/order-volume');
   return j.data;
 }
 
@@ -298,6 +287,7 @@ export default {
   getWarehouseDetail,
   getStockStatistics,
   getStockByWarehouse,
+  getOrderVolume,
   createAlert,
   updateConfig,
   deleteWarehouse,

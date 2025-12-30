@@ -37,7 +37,6 @@ export default function useAdminData() {
     return () => { mounted = false; };
   }, []);
 
-  // derive small metrics
   const metrics = {
     totalWarehouses: warehouses.length,
     activeUsers: users.filter(u => u.status === 'active').length,
@@ -47,7 +46,6 @@ export default function useAdminData() {
     transferEfficiency: `${Math.round(((transfers.filter(t=>t.status==='completed').length) / Math.max(1, transfers.length))*100)}%`
   };
 
-  // expose a reload function so callers can refresh after mutations
   const reload = async () => {
     try {
       setLoading(true);

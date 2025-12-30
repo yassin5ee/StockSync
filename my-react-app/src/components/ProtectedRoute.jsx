@@ -13,19 +13,15 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
   const user = getCurrentUser();
   const userRole = getUserRole();
 
-  // If no user is logged in, redirect to login
   if (!user || !userRole) {
     return <Navigate to="/login" replace />;
   }
 
-  // Admin and logistic_admin can access all pages (bypass allowedRoles check)
   if (isAdminOrLogisticAdmin()) {
     return children;
   }
 
-  // Check if user's role is in the allowed roles list
   if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-    // Redirect to user's default page based on their role
     const defaultPage = getDefaultPageForRole(userRole);
     return <Navigate to={defaultPage} replace />;
   }
@@ -33,9 +29,6 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
   return children;
 }
 
-/**
- * Get the default page for a user role
- */
 function getDefaultPageForRole(role) {
   const rolePageMap = {
     'admin': '/home',

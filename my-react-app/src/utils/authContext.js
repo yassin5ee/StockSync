@@ -12,9 +12,6 @@ export function getCurrentUser() {
 }
 
 export function getUserWarehouses() {
-  // Warehouses are no longer part of user model
-  // This function is kept for backward compatibility
-  // All authenticated users can access all warehouses for now
   return [];
 }
 
@@ -29,7 +26,6 @@ export function getUserRole() {
 }
 
 export function getUserRoles() {
-  // Backward compatibility - return array with single role
   const role = getUserRole();
   return role ? [role] : [];
 }
@@ -54,22 +50,16 @@ export function isAgent() {
 }
 
 export function canAccessWarehouse(warehouseName) {
-  // For now, all authenticated users can access all warehouses
-  // This can be customized based on role requirements
   if (isAdmin()) return true;
-  return true; // All users can access all warehouses
+  return true;
 }
 
 export function getFilteredWarehouses(allWarehouses) {
-  // For now, all authenticated users can see all warehouses
-  // This can be customized based on role requirements
   if (isAdmin()) return allWarehouses;
   return allWarehouses;
 }
 
 export function getFilteredTransfers(allTransfers) {
-  // For now, all authenticated users can see all transfers
-  // This can be customized based on role requirements
   if (isAdmin()) return allTransfers;
   return allTransfers;
 }

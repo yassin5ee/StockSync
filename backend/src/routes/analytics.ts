@@ -11,7 +11,6 @@ import { getWarehouseFilter, getTransferFilter, isAdmin } from '../middleware/au
 
 const router = Router();
 
-// Get comprehensive analytics data
 router.get('/metrics', async (req: Request, res: Response) => {
   try {
     const warehouseFilter = getWarehouseFilter(req);
@@ -22,20 +21,17 @@ router.get('/metrics', async (req: Request, res: Response) => {
     const alerts = await Alert.find().lean();
     const users = await User.find().lean();
 
-    // Get stock-based statistics
     const warehouseIds = warehouses.map(w => w._id);
     const stockRecords = await Stock.find({ warehouse_id: { $in: warehouseIds } }).lean();
     const products = await Product.find().lean();
     const stockEntries = await StockEntry.find({ warehouse_id: { $in: warehouseIds } }).lean();
     const stockExits = await StockExit.find({ warehouse_id: { $in: warehouseIds } }).lean();
 
-    // Calculate stock-based metrics
     const totalStockQuantity = stockRecords.reduce((sum, s) => sum + (s.quantity || 0), 0);
     const totalUniqueProducts = products.length;
     const totalStockEntries = stockEntries.length;
     const totalStockExits = stockExits.length;
     
-    // Calculate entries/exits for last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const recentEntries = stockEntries.filter(e => new Date(e.createdAt) >= thirtyDaysAgo).length;
@@ -47,13 +43,11 @@ router.get('/metrics', async (req: Request, res: Response) => {
       .filter(e => new Date(e.createdAt) >= thirtyDaysAgo)
       .reduce((sum, e) => sum + (e.quantity || 0), 0);
 
-    // Calculate metrics
     const totalCapacity = warehouses.reduce((sum, w) => sum + (w.capacity || 0), 0);
     const totalUsed = warehouses.reduce((sum, w) => sum + (w.used || 0), 0);
     const warehouseOccupancy = totalCapacity > 0 ? Math.round((totalUsed / totalCapacity) * 100) : 0;
 
     const operationalWarehouses = warehouses.filter(w => w.status === 'operational').length;
-    // Use real product count from products collection
     const totalProducts = totalUniqueProducts;
 
     const transfersInTransit = transfers.filter(t => t.status === 'in_transit').length;
@@ -116,13 +110,11 @@ router.get('/metrics', async (req: Request, res: Response) => {
   }
 });
 
-// Get warehouse performance summary
 router.get('/warehouses-summary', async (req: Request, res: Response) => {
   try {
     const filter = getWarehouseFilter(req);
     const warehouses = await Warehouse.find(filter).lean();
 
-    // Get stock data for each warehouse
     const warehouseIds = warehouses.map(w => w._id);
     const stockByWarehouse = await Stock.find({ warehouse_id: { $in: warehouseIds } }).lean();
     
@@ -138,8 +130,8 @@ router.get('/warehouses-summary', async (req: Request, res: Response) => {
         capacity: w.capacity,
         used: w.used,
         occupancyRate: w.capacity > 0 ? Math.round((w.used / w.capacity) * 100) : 0,
-        productsCount: uniqueProducts, // Real count from stock
-        totalProducts: totalStockQuantity, // Total quantity in stock
+        productsCount: uniqueProducts,
+        totalProducts: totalStockQuantity,
         status: w.status,
         manager: w.manager
       };
@@ -152,7 +144,6 @@ router.get('/warehouses-summary', async (req: Request, res: Response) => {
   }
 });
 
-// Get single warehouse details by name
 router.get('/warehouse/:name', async (req: Request, res: Response) => {
   try {
     const warehouse = await Warehouse.findOne({ name: req.params.name }).lean();
@@ -161,24 +152,16 @@ router.get('/warehouse/:name', async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Warehouse not found' });
     }
     
-    // Check access permission
-    // For now, all authenticated users can access all warehouses
-    // This can be customized based on role requirements
     if (req.user && !isAdmin(req)) {
-      // All non-admin users can access warehouses for now
-      // This can be customized if warehouse-specific access is needed
     }
 
-    // Get real stock data for this warehouse
     const warehouseStock = await Stock.find({ warehouse_id: warehouse._id }).populate('product_id').lean();
     const totalStockQuantity = warehouseStock.reduce((sum, s) => sum + (s.quantity || 0), 0);
     const uniqueProducts = new Set(warehouseStock.map(s => s.product_id?.toString())).size;
     
-    // Get stock entries and exits for this warehouse
     const entries = await StockEntry.find({ warehouse_id: warehouse._id }).lean();
     const exits = await StockExit.find({ warehouse_id: warehouse._id }).lean();
-    
-    // Last 30 days statistics
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const recentEntries = entries.filter(e => new Date(e.createdAt) >= thirtyDaysAgo);
@@ -191,8 +174,8 @@ router.get('/warehouse/:name', async (req: Request, res: Response) => {
       capacity: warehouse.capacity,
       used: warehouse.used,
       occupancyRate: warehouse.capacity > 0 ? Math.round((warehouse.used / warehouse.capacity) * 100) : 0,
-      productsCount: uniqueProducts, // Real count from stock
-      totalProducts: totalStockQuantity, // Total quantity in stock
+      productsCount: uniqueProducts,
+      totalProducts: totalStockQuantity,
       status: warehouse.status,
       manager: warehouse.manager,
       stock: {
@@ -212,7 +195,6 @@ router.get('/warehouse/:name', async (req: Request, res: Response) => {
   }
 });
 
-// Get transfer analytics
 router.get('/transfers-summary', async (req: Request, res: Response) => {
   try {
     const filter = getTransferFilter(req);
@@ -236,7 +218,7 @@ router.get('/transfers-summary', async (req: Request, res: Response) => {
         byStatus,
         totalTransfers: transfers.length,
         totalItems,
-        transfers: transfers.slice(0, 20) // recent transfers
+        transfers: transfers.slice(0, 20)
       }
     });
   } catch (err) {
@@ -245,7 +227,6 @@ router.get('/transfers-summary', async (req: Request, res: Response) => {
   }
 });
 
-// Get alerts summary
 router.get('/alerts-summary', async (_req: Request, res: Response) => {
   try {
     const alerts = await Alert.find().lean();
@@ -273,14 +254,12 @@ router.get('/alerts-summary', async (_req: Request, res: Response) => {
   }
 });
 
-// Get stock statistics
 router.get('/stock-statistics', async (req: Request, res: Response) => {
   try {
     const warehouseFilter = getWarehouseFilter(req);
     const warehouses = await Warehouse.find(warehouseFilter).lean();
     const warehouseIds = warehouses.map(w => w._id);
 
-    // Get all stock data
     const stockRecords = await Stock.find({ warehouse_id: { $in: warehouseIds } })
       .populate('product_id')
       .populate('warehouse_id')
@@ -296,11 +275,9 @@ router.get('/stock-statistics', async (req: Request, res: Response) => {
       .populate('user_id')
       .lean();
 
-    // Calculate statistics
     const totalStockQuantity = stockRecords.reduce((sum, s) => sum + (s.quantity || 0), 0);
     const totalUniqueProducts = products.length;
     
-    // Products with low stock (below min_quantity)
     const lowStockProducts = [];
     for (const stock of stockRecords) {
       const product = products.find(p => p._id.toString() === stock.product_id.toString());
@@ -315,13 +292,11 @@ router.get('/stock-statistics', async (req: Request, res: Response) => {
       }
     }
 
-    // Last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const recentEntries = stockEntries.filter(e => new Date(e.createdAt) >= thirtyDaysAgo);
     const recentExits = stockExits.filter(e => new Date(e.createdAt) >= thirtyDaysAgo);
 
-    // By category
     const stockByCategory: Record<string, number> = {};
     products.forEach(p => {
       if (p.category) {
@@ -343,7 +318,7 @@ router.get('/stock-statistics', async (req: Request, res: Response) => {
         recentExits: recentExits.length,
         recentEntriesQuantity: recentEntries.reduce((sum, e) => sum + (e.quantity || 0), 0),
         recentExitsQuantity: recentExits.reduce((sum, e) => sum + (e.quantity || 0), 0),
-        lowStockProducts: lowStockProducts.slice(0, 10), // Top 10 low stock items
+        lowStockProducts: lowStockProducts.slice(0, 10),
         stockByCategory
       }
     });
@@ -353,7 +328,36 @@ router.get('/stock-statistics', async (req: Request, res: Response) => {
   }
 });
 
-// Get stock by warehouse
+router.get('/order-volume', async (req: Request, res: Response) => {
+  try {
+    const warehouseFilter = getWarehouseFilter(req);
+    const warehouses = await Warehouse.find(warehouseFilter).lean();
+    const warehouseIds = warehouses.map(w => w._id);
+
+    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+    
+    const monthlyData: Record<number, number> = {};
+    
+    const stockExits = await StockExit.find({ warehouse_id: { $in: warehouseIds } }).lean();
+    
+    stockExits.forEach(exit => {
+      const date = new Date(exit.createdAt);
+      const month = date.getMonth();
+      monthlyData[month] = (monthlyData[month] || 0) + 1;
+    });
+
+    const result = monthNames.map((name, index) => ({
+      name,
+      value: monthlyData[index] || 0
+    }));
+
+    return res.json({ success: true, data: result });
+  } catch (err) {
+    console.error('Order volume error', err);
+    return res.status(500).json({ success: false, error: 'Failed to get order volume' });
+  }
+});
+
 router.get('/stock/:warehouseId', async (req: Request, res: Response) => {
   try {
     const { warehouseId } = req.params;

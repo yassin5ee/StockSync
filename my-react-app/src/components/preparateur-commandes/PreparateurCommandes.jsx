@@ -18,7 +18,6 @@ const PreparateurCommandes = () => {
     }
   }, [navigate]);
 
-  // Fetch transfers and warehouses data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,7 +40,6 @@ const PreparateurCommandes = () => {
     fetchData();
   }, []);
 
-  // Compute metrics from real transfer data
   const metrics = {
     commandesAPreparer: transfers?.byStatus?.in_transit || 0,
     lignesTerminees: Math.floor((transfers?.totalItems || 0) * 0.48),
@@ -49,7 +47,6 @@ const PreparateurCommandes = () => {
     tempsMoyen: 45
   };
 
-  // Generate tasks from transfers (simulating picking commands)
   const tasks = transfers?.transfers?.slice(0, 4).map((t, idx) => ({
     id: `CMD-${new Date().toISOString().split('T')[0]}-${String(idx + 1).padStart(3, '0')}`,
     priorite: idx === 0 ? 'Urgent' : idx === 1 ? 'Haute' : 'Standard',
@@ -66,7 +63,6 @@ const PreparateurCommandes = () => {
     prevuCamion: transfers?.total || 0
   };
 
-  // Navigation functions
   const navigateToRole = (roleKey, event) => {
     if (event) event.preventDefault();
     const roleName = getRoleName(roleKey);
@@ -130,7 +126,6 @@ const PreparateurCommandes = () => {
   const startPicking = async (commandeId) => {
     try {
       showMessage(`Démarrage de la préparation pour ${commandeId}...`, 'info');
-      // Find transfer and update status to in_transit (picking started)
       const transfer = transfers?.transfers?.find(t => t._id === commandeId);
       if (transfer) {
         await api.updateTransfer(transfer._id, { status: 'in_transit' });
@@ -150,10 +145,8 @@ const PreparateurCommandes = () => {
   const continuePicking = async (commandeId) => {
     try {
       showMessage(`Reprise de la préparation pour ${commandeId}...`, 'info');
-      // Transfer already in_transit, just show it's being continued
       const transfer = transfers?.transfers?.find(t => t._id === commandeId);
       if (transfer && transfer.status === 'in_transit') {
-        // Just notify that picking continues
         showMessage(`Préparation continuée pour ${commandeId}`, 'success');
       } else {
         showMessage('Impossible de continuer - vérifiez le statut du transfert', 'error');
@@ -167,7 +160,6 @@ const PreparateurCommandes = () => {
   const viewDetails = async (commandeId) => {
     try {
       showMessage(`Chargement des détails pour ${commandeId}...`, 'info');
-      // Find and display transfer details
       const transfer = transfers?.transfers?.find(t => t._id === commandeId);
       if (transfer) {
         const details = `Transfert ${commandeId}\nDe: ${transfer.fromWarehouse}\nVers: ${transfer.toWarehouse}\nArticles: ${transfer.items?.length || 0}\nStatut: ${transfer.status}`;
@@ -182,7 +174,6 @@ const PreparateurCommandes = () => {
   const launchWave = async () => {
     try {
       showMessage('Lancement d\'une nouvelle vague de picking...', 'info');
-      // Get all planned transfers and mark them as in_transit
       const plannedTransfers = transfers?.transfers?.filter(t => t.status === 'planned') || [];
       
       if (plannedTransfers.length === 0) {
@@ -190,7 +181,6 @@ const PreparateurCommandes = () => {
         return;
       }
 
-      // Update first batch of planned transfers
       const updatePromises = plannedTransfers.slice(0, 5).map(t => 
         api.updateTransfer(t._id, { status: 'in_transit' })
       );

@@ -27,7 +27,6 @@ const Login = () => {
       const user = await api.login(payload);
       showMessage('Connexion réussie ! Redirection...', 'success');
 
-      // store user data (tokens are already stored by api.login)
       localStorage.setItem('username', user.name || username);
       localStorage.setItem('user', JSON.stringify(user));
       if (rememberMe) {
@@ -37,7 +36,6 @@ const Login = () => {
   setTimeout(() => navigate('/'), 800);
     } catch (err) {
       console.error('Login error', err);
-      // try to extract server message
       const message = err?.message?.includes('401') ? 'Identifiant ou mot de passe incorrect.' : 'Impossible de joindre le serveur.';
       showMessage(message, 'error');
     }
@@ -54,18 +52,15 @@ const Login = () => {
 
   return (
     <div className="login">
-      {/* Status Message */}
       {showStatus && (
         <div className={`status-message ${statusMessage.type}`}>
           {statusMessage.text}
         </div>
       )}
 
-      {/* Header */}
       <header className="header">
         <div className="header-container">
           <div className="header-left">
-            {/* Logo */}
             <div className="logo-container">
               <span className="logo-text">StockSync</span>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="logo-icon">
@@ -77,7 +72,6 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Right Section: Utilities */}
           <div className="header-right">
             <div className="utility-buttons">
               <button 
@@ -106,7 +100,6 @@ const Login = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="login-main">
         <div className="login-container">
           <div className="login-card">
@@ -193,7 +186,6 @@ const Login = () => {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="footer">
         <div className="footer-content">
           <p>&copy; 2025 StockSync. Optimisation Logistique. Version 1.0</p>

@@ -14,7 +14,6 @@ const StockSchema = new Schema<IStock>({
   updatedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-// Unique constraint: one product per warehouse
 StockSchema.index({ product_id: 1, warehouse_id: 1 }, { unique: true });
 
 const Stock = model<IStock>('Stock', StockSchema);

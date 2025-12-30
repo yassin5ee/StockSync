@@ -16,8 +16,13 @@ const Warehouse = () => {
   const [transfersSummary, setTransfersSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [stockData, setStockData] = useState([]);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [transferType, setTransferType] = useState('externe');
+  const [destinationWarehouse, setDestinationWarehouse] = useState('');
+  const [destinationLocation, setDestinationLocation] = useState('');
+  const [transferItems, setTransferItems] = useState([{ sku: '', quantity: 1 }]);
+  const [isCreatingTransfer, setIsCreatingTransfer] = useState(false);
 
-  // Navigation functions
   const navigateToRole = (roleKey, event) => {
     if (event) event.preventDefault();
     const roleName = getRoleName(roleKey);
@@ -78,50 +83,99 @@ const Warehouse = () => {
     }, 3000);
   };
 
-  const startInventory = async () => {
-    try {
-      if (!warehouse) {
-        showMessage('Veuillez sélectionner un entrepôt', 'warning');
-        return;
-      }
-      
-      showMessage(`Lancement d'un nouvel inventaire pour ${warehouse}...`, 'info');
-      
-      // Create an alert to track inventory start
-      const alertPayload = {
-        type: 'inventory_start',
-        severity: 'low',
-        message: `Inventaire démarré pour ${warehouse}`,
-        timestamp: new Date(),
-        relatedWarehouse: warehouse
-      };
-      
-      await api.createAlert(alertPayload);
-      showMessage(`Inventaire lancé pour ${warehouse}`, 'success');
-    } catch (err) {
-      console.error('Error starting inventory:', err);
-      showMessage('Erreur lors du lancement de l\'inventaire', 'error');
+  const handleTransfer = () => {
+    if (!warehouse) {
+      showMessage('Veuillez sélectionner un entrepôt', 'warning');
+      return;
     }
+    setShowTransferModal(true);
+    setTransferType('externe');
+    setDestinationWarehouse('');
+    setDestinationLocation('');
+    setTransferItems([{ sku: '', quantity: 1 }]);
   };
 
-  const viewLocations = async () => {
+  const closeTransferModal = () => {
+    setShowTransferModal(false);
+    setTransferItems([{ sku: '', quantity: 1 }]);
+    setDestinationWarehouse('');
+    setDestinationLocation('');
+  };
+
+  const addTransferItem = () => {
+    setTransferItems([...transferItems, { sku: '', quantity: 1 }]);
+  };
+
+  const removeTransferItem = (index) => {
+    const newItems = transferItems.filter((_, i) => i !== index);
+    setTransferItems(newItems.length > 0 ? newItems : [{ sku: '', quantity: 1 }]);
+  };
+
+  const updateTransferItem = (index, field, value) => {
+    const newItems = [...transferItems];
+    if (field === 'quantity') {
+      newItems[index][field] = parseInt(value) || 1;
+    } else {
+      newItems[index][field] = value;
+    }
+    setTransferItems(newItems);
+  };
+
+  const createTransfer = async () => {
+    if (!warehouse) {
+      showMessage('Veuillez sélectionner un entrepôt source', 'warning');
+      return;
+    }
+
+    if (transferType === 'externe' && !destinationWarehouse) {
+      showMessage('Veuillez sélectionner un entrepôt de destination', 'warning');
+      return;
+    }
+
+    if (transferType === 'interne' && !destinationLocation) {
+      showMessage('Veuillez saisir un emplacement de destination', 'warning');
+      return;
+    }
+
+    const validItems = transferItems.filter(item => item.sku && item.quantity > 0);
+    if (validItems.length === 0) {
+      showMessage('Veuillez ajouter au moins un produit avec une quantité valide', 'warning');
+      return;
+    }
+
+    setIsCreatingTransfer(true);
     try {
-      if (!warehouse) {
-        showMessage('Veuillez sélectionner un entrepôt', 'warning');
-        return;
-      }
+      const payload = {
+        fromWarehouse: warehouse,
+        toWarehouse: transferType === 'externe' ? destinationWarehouse : warehouse,
+        items: validItems.map(item => ({
+          sku: item.sku,
+          quantity: item.quantity
+        })),
+        status: 'planned',
+        type: transferType
+      };
       
-      showMessage(`Chargement des emplacements pour ${warehouse}...`, 'info');
-      
-      // Get warehouse detail
-      const detail = await api.getWarehouseDetail(warehouse);
-      if (detail) {
-        const locationInfo = `Emplacements - ${warehouse}\nCapacité: ${detail.capacity}\nUtilisé: ${detail.used}\nOccupation: ${Math.round((detail.used / detail.capacity) * 100)}%\nProduits: ${detail.totalProducts || 0}`;
-        showMessage(locationInfo, 'info');
+      if (transferType === 'interne' && destinationLocation) {
+        payload.destinationLocation = destinationLocation;
       }
+
+      await api.createTransfer(payload);
+      showMessage(`Transfert ${transferType === 'externe' ? 'externe' : 'interne'} créé avec succès`, 'success');
+      
+      const [summary, transfers] = await Promise.all([
+        api.getWarehousesSummary(),
+        api.getTransfersSummary()
+      ]);
+      setWarehousesSummary(summary || []);
+      setTransfersSummary(transfers);
+      
+      closeTransferModal();
     } catch (err) {
-      console.error('Error viewing locations:', err);
-      showMessage('Erreur lors du chargement des emplacements', 'error');
+      console.error('Error creating transfer:', err);
+      showMessage('Erreur lors de la création du transfert', 'error');
+    } finally {
+      setIsCreatingTransfer(false);
     }
   };
 
@@ -136,7 +190,6 @@ const Warehouse = () => {
     }
   }, [navigate]);
 
-  // Fetch warehouse data on mount and when warehouse changes
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -149,7 +202,6 @@ const Warehouse = () => {
         setWarehousesSummary(summary || []);
         setTransfersSummary(transfers);
 
-        // Set default warehouse to first one if not set
         if (!warehouse && summary && summary.length > 0) {
           setWarehouse(summary[0].name);
           setWarehouseData(summary[0]);
@@ -158,19 +210,16 @@ const Warehouse = () => {
           setWarehouseData(selected || summary[0]);
         }
 
-        // Get real stock data for selected warehouse
         if (summary && summary.length > 0) {
           const selected = summary.find(w => w.name === warehouse) || summary[0];
           if (selected && selected.id) {
             try {
               const stockList = await api.getStockByWarehouse(selected.id);
-              // Transform stock data for display
               const formattedStock = stockList.map((item, index) => {
                 const product = item.product || {};
                 const quantity = item.quantity || 0;
                 const minQuantity = product.min_quantity || 0;
                 
-                // Determine status based on quantity
                 let status = 'ok';
                 if (quantity === 0) {
                   status = 'rupture';
@@ -206,7 +255,6 @@ const Warehouse = () => {
     fetchData();
   }, [warehouse]);
 
-  // Status Badge component
   const StatusBadge = ({ status }) => {
     const statusConfig = {
       ok: { label: 'OK', class: 'badge-ok' },
@@ -225,21 +273,15 @@ const Warehouse = () => {
 
   return (
     <div className="warehouse">
-      {/* Status Message */}
       {showStatus && (
         <div className={`status-message ${statusMessage.includes('déconnecté') ? 'info' : 'default'}`}>
           {statusMessage}
         </div>
       )}
 
-      {/* Header */}
       <header className="header">
         <div className="header-container">
-          
-          {/* Left Section: Back + Logo + Navigation */}
           <div className="header-left">
-            
-            {/* Back Link */}
             <a 
               href="#" 
               onClick={(e) => navigateToRole('home', e)} 
@@ -253,9 +295,7 @@ const Warehouse = () => {
               Retour
             </a>
 
-            {/* Logo and Navigation Container */}
             <div className="header-left">
-              {/* Logo */}
               <div className="logo-container">
                 <span className="logo-text">StockSync</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="logo-icon">
@@ -265,7 +305,6 @@ const Warehouse = () => {
                 </svg>
               </div>
               
-              {/* Main Navigation */}
               <nav className="navigation">
                 <a href="#" className="nav-link" onClick={(e) => navigateToRole('home', e)}>
                   Accueil
@@ -289,9 +328,7 @@ const Warehouse = () => {
             </div>
           </div>
 
-          {/* Right Section: Utilities and User */}
           <div className="header-right">
-            {/* Notifications and Settings */}
             <div className="utility-buttons">
               <button 
                 title="Notifications" 
@@ -315,7 +352,6 @@ const Warehouse = () => {
               </button>
             </div>
             
-            {/* User Info and Logout */}
             <div className="user-info">
               <span className="user-text">
                 Connecté en tant que: <span className="user-name">{userName}</span>
@@ -331,16 +367,12 @@ const Warehouse = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="main-content">
-        
-        {/* Dashboard Title */}
         <div className="dashboard-title">
           <h1>Gestion Opérationnelle des Entrepôts</h1>
           <p>Vue en temps réel des stocks, emplacements et inventaires en cours.</p>
         </div>
 
-        {/* Warehouse Actions */}
         <div className="warehouse-actions">
           <div className="warehouse-select">
             <label className="select-label">Entrepôt Actuel :</label>
@@ -356,30 +388,19 @@ const Warehouse = () => {
           </div>
           <div className="action-buttons">
             <button 
-              onClick={startInventory}
+              onClick={handleTransfer}
               className="action-button primary"
+              style={{ width: '100%', justifyContent: 'center', backgroundColor: '#2563eb' }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9v-9m0-9v9"/>
+                <rect x="2" y="6" width="6" height="12" rx="1"/><rect x="16" y="6" width="6" height="12" rx="1"/><path d="M8 12h8"/><path d="m10 9-2 3 2 3"/><path d="m14 9 2 3-2 3"/>
               </svg>
-              Nouvel Inventaire
-            </button>
-            <button 
-              onClick={viewLocations}
-              className="action-button secondary"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="3 11 22 2 13 21 11 13 3 11"/>
-              </svg>
-              Planification des Emplacements
+              Nouveau Transfert / Déplacement
             </button>
           </div>
         </div>
         
-        {/* Performance Metrics */}
         <div className="metrics-grid">
-          
-          {/* Stock Général */}
           <div className="metric-card blue">
             <h3>Stock Général</h3>
             <p className="metric-value blue">{warehouseData?.totalProducts?.toLocaleString() || '0'}</p>
@@ -396,7 +417,6 @@ const Warehouse = () => {
             </div>
           </div>
 
-          {/* Transferts en Cours */}
           <div className="metric-card orange">
             <h3>Transferts Opérationnels</h3>
             <p className="metric-value orange">{transfersSummary?.byStatus?.in_transit || 0}</p>
@@ -413,7 +433,6 @@ const Warehouse = () => {
             </div>
           </div>
 
-          {/* Status Entrepôt */}
           <div className="metric-card red">
             <h3>Statut Entrepôt</h3>
             <p className="metric-value red">{warehouseData?.status === 'operational' ? '🟢 Opérationnel' : '⚠️ ' + warehouseData?.status}</p>
@@ -427,7 +446,6 @@ const Warehouse = () => {
           </div>
         </div>
 
-        {/* Stock Table */}
         <div className="stock-section">
           <div className="section-header">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -475,7 +493,167 @@ const Warehouse = () => {
         </div>
       </main>
 
-      {/* Footer */}
+      {showTransferModal && (
+        <div className="modal-overlay" onClick={closeTransferModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Nouveau Transfert / Déplacement</h2>
+              <button className="modal-close" onClick={closeTransferModal}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                </svg>
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Type de transfert</label>
+                <div className="radio-group">
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="transferType"
+                      value="externe"
+                      checked={transferType === 'externe'}
+                      onChange={(e) => setTransferType(e.target.value)}
+                    />
+                    <span>Transfert externe (vers un autre entrepôt)</span>
+                  </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="transferType"
+                      value="interne"
+                      checked={transferType === 'interne'}
+                      onChange={(e) => setTransferType(e.target.value)}
+                    />
+                    <span>Déplacement interne (même entrepôt)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Entrepôt source</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={warehouse}
+                  disabled
+                />
+              </div>
+
+              {transferType === 'externe' ? (
+                <div className="form-group">
+                  <label className="form-label">Entrepôt de destination *</label>
+                  <select
+                    className="form-input"
+                    value={destinationWarehouse}
+                    onChange={(e) => setDestinationWarehouse(e.target.value)}
+                  >
+                    <option value="">Sélectionnez un entrepôt</option>
+                    {warehousesSummary
+                      .filter(w => w.name !== warehouse)
+                      .map(w => (
+                        <option key={w.id} value={w.name}>
+                          {w.name} - {w.location}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="form-group">
+                  <label className="form-label">Emplacement de destination *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Aisle-05-R02-L3"
+                    value={destinationLocation}
+                    onChange={(e) => setDestinationLocation(e.target.value)}
+                  />
+                </div>
+              )}
+
+              <div className="form-group">
+                <div className="form-group-header">
+                  <label className="form-label">Produits à transférer</label>
+                  <button
+                    type="button"
+                    className="btn-add-item"
+                    onClick={addTransferItem}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 5v14"/><path d="M5 12h14"/>
+                    </svg>
+                    Ajouter un produit
+                  </button>
+                </div>
+
+                <div className="transfer-items-list">
+                  {transferItems.map((item, index) => (
+                    <div key={index} className="transfer-item-row">
+                      <div className="transfer-item-input">
+                        <label className="form-label-small">SKU *</label>
+                        <input
+                          type="text"
+                          className="form-input-small"
+                          placeholder="SKU-123"
+                          value={item.sku}
+                          onChange={(e) => updateTransferItem(index, 'sku', e.target.value)}
+                          list={`sku-list-${index}`}
+                        />
+                        <datalist id={`sku-list-${index}`}>
+                          {stockData.map((stock, idx) => (
+                            <option key={idx} value={stock.sku} />
+                          ))}
+                        </datalist>
+                      </div>
+                      <div className="transfer-item-input">
+                        <label className="form-label-small">Quantité *</label>
+                        <input
+                          type="number"
+                          className="form-input-small"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) => updateTransferItem(index, 'quantity', e.target.value)}
+                        />
+                      </div>
+                      {transferItems.length > 1 && (
+                        <button
+                          type="button"
+                          className="btn-remove-item"
+                          onClick={() => removeTransferItem(index)}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="action-button secondary"
+                onClick={closeTransferModal}
+                disabled={isCreatingTransfer}
+              >
+                Annuler
+              </button>
+              <button
+                className="action-button primary"
+                onClick={createTransfer}
+                disabled={isCreatingTransfer}
+              >
+                {isCreatingTransfer ? 'Création...' : 'Créer le transfert'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <footer className="footer">
         <div className="footer-content">
           <p>&copy; 2025 StockSync. Optimisation Logistique. Version 1.0</p>

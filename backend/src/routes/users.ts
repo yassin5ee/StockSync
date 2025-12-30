@@ -10,7 +10,6 @@ router.get('/', async (_req: Request, res: Response) => {
   res.json({ success: true, data: list });
 });
 
-// Login route - placed before catch-all POST('/') so it is reachable
 router.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -19,7 +18,6 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: 'Email and password required' });
     }
 
-    // case-insensitive lookup to avoid simple mismatches
     const escaped = String(email).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const user = await User.findOne({ email: { $regex: `^${escaped}$`, $options: 'i' } });
 
@@ -36,7 +34,6 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, error: 'Invalid email or password' });
     }
 
-    // Generate JWT tokens
     const tokenPayload = {
       id: user._id.toString(),
       email: user.email,
@@ -98,7 +95,6 @@ router.put('/:id', async (req: Request, res: Response) => {
     if (email) updateData.email = email;
     if (role) updateData.role = role;
     
-    // If password is provided, hash it
     if (password) {
       const salt = await bcrypt.genSalt(10);
       updateData.passwordHash = await bcrypt.hash(password, salt);
@@ -141,7 +137,6 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Token refresh endpoint
 router.post('/refresh', async (req: Request, res: Response) => {
   try {
     const { refreshToken } = req.body;
@@ -157,13 +152,11 @@ router.post('/refresh', async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, error: 'Invalid or expired refresh token' });
     }
 
-    // Verify user still exists
     const user = await User.findById(decoded.id).lean();
     if (!user) {
       return res.status(401).json({ success: false, error: 'User not found' });
     }
 
-    // Generate new tokens
     const tokenPayload = {
       id: user._id.toString(),
       email: user.email,

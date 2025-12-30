@@ -11,15 +11,12 @@ const AdministrationLogistique = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   
-  // Analytics data
   const [analyticsData, setAnalyticsData] = useState(null);
   const [warehousesList, setWarehousesList] = useState([]);
   const [transfersList, setTransfersList] = useState(null);
   const [alertsList, setAlertsList] = useState(null);
   const [usersList, setUsersList] = useState([]);
   const [systemConfig, setSystemConfig] = useState({});
-
-  // Fetch all analytics data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -48,7 +45,6 @@ const AdministrationLogistique = () => {
     fetchData();
   }, []);
 
-  // Compute global metrics from real data (now includes stock statistics)
   const globalMetrics = {
     totalWarehouses: analyticsData?.warehouses?.total || 0,
     activeUsers: usersList.length || 0,
@@ -59,7 +55,6 @@ const AdministrationLogistique = () => {
     fulfillmentRate: `${analyticsData?.transfers?.completed || 0}/${analyticsData?.transfers?.total || 0}`
   };
 
-  // Create helpers to add items from the UI
   const reload = async () => {
     const [metrics, warehouses, transfers, alerts, users] = await Promise.all([
       api.getAnalyticsMetrics(),
@@ -127,12 +122,10 @@ const AdministrationLogistique = () => {
     }
   };
 
-  // Fonctions de navigation
   const navigateToRole = (roleKey, event) => {
     if (event) event.preventDefault();
     const roleName = getRoleName(roleKey);
     alertUser(`Accès au rôle : ${roleName}`);
-    // also navigate to relevant route
     switch (roleKey) {
       case 'home':
         navigate('/home');
@@ -261,7 +254,6 @@ const AdministrationLogistique = () => {
     }
   };
 
-  // Composants de statut
   const StatusBadge = ({ status, type }) => {
     const getStatusConfig = () => {
       switch(status) {
@@ -347,7 +339,6 @@ const AdministrationLogistique = () => {
     return <span className="alert-icon">{icons[type]}</span>;
   };
 
-  // Composants de section
   const OverviewSection = () => (
     <div className="tab-content">
       <div className="metrics-grid">
@@ -744,7 +735,6 @@ const AdministrationLogistique = () => {
 
   return (
     <div className="admin-logistique">
-      {/* Status Message */}
       {showStatus && (
         <div className={`status-message ${statusMessage.includes('déconnecté') ? 'info' : 'default'}`}>
           {statusMessage}
@@ -755,7 +745,6 @@ const AdministrationLogistique = () => {
         <div className="status-message default">Chargement des données d'administration...</div>
       )}
 
-      {/* Header */}
       <header className="header">
         <div className="header-container">
           
@@ -846,16 +835,12 @@ const AdministrationLogistique = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="main-content">
-        
-        {/* Dashboard Title */}
         <div className="dashboard-title">
           <h1>Administration Logistique</h1>
           <p>Supervision multi-sites et coordination des opérations logistiques</p>
         </div>
 
-        {/* Navigation Tabs */}
         <div className="admin-tabs">
           <button 
             className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
@@ -913,11 +898,9 @@ const AdministrationLogistique = () => {
           </button>
         </div>
 
-        {/* Tab Content */}
         {renderTabContent()}
       </main>
 
-      {/* Footer */}
       <footer className="footer">
         <div className="footer-content">
           <p>&copy; 2025 StockSync. Administration Logistique Multi-Sites. Version 1.0</p>

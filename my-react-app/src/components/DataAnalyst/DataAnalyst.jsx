@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import useAdminData from '../../utils/useAdminData';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import './DataAnalyst.css';
 
 const DataAnalyst = () => {
@@ -16,6 +17,7 @@ const DataAnalyst = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [showStatus, setShowStatus] = useState(false);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [chartData, setChartData] = useState([]);
   const [filters, setFilters] = useState({
     warehouseFilter: '',
     statusFilter: 'all',
@@ -32,17 +34,19 @@ const DataAnalyst = () => {
     const fetchAnalytics = async () => {
       try {
         setAnalyticsLoading(true);
-        const [metrics, warehouses, transfers, alerts] = await Promise.all([
+        const [metrics, warehouses, transfers, alerts, orderVolume] = await Promise.all([
           api.getAnalyticsMetrics(),
           api.getWarehousesSummary(),
           api.getTransfersSummary(),
-          api.getAlertsSummary()
+          api.getAlertsSummary(),
+          api.getOrderVolume()
         ]);
         
         setAnalyticsData(metrics);
         setWarehousesSummary(warehouses || []);
         setTransfersSummary(transfers);
         setAlertsSummary(alerts);
+        setChartData(orderVolume || []);
       } catch (err) {
         console.error('Failed to fetch analytics:', err);
         showMessage('Erreur lors du chargement des données analytiques', 'error');
@@ -54,18 +58,15 @@ const DataAnalyst = () => {
     fetchAnalytics();
   }, []);
 
-  // Fallback computed values (now using real stock data)
   const rotationStocks = analyticsData?.stock?.totalProducts || analyticsData?.warehouses?.totalProducts || 0;
   const delaiPreparation = analyticsData?.transfers?.inTransit || 0;
   const tauxErreur = analyticsData?.alerts?.total || 0;
   const remplissageEntrepot = analyticsData?.warehouses?.occupancy || 0;
 
-  // Navigation functions
   const navigateToRole = (roleKey, event) => {
     if (event) event.preventDefault();
     const roleName = getRoleName(roleKey);
     alertUser(`Accès au rôle : ${roleName}`);
-    // navigate to the matching route for the selected role
     switch (roleKey) {
       case 'data_analyst':
         navigate('/data-analyst');
@@ -124,7 +125,6 @@ const DataAnalyst = () => {
 
   const applyFilters = () => {
     try {
-      // Filter warehouses by name if filter is set
       let filteredWarehouses = warehousesSummary;
       if (filters.warehouseFilter) {
         filteredWarehouses = warehousesSummary.filter(w => 
@@ -132,7 +132,6 @@ const DataAnalyst = () => {
         );
       }
       
-      // Filter transfers by status if filter is set
       let filteredTransfers = transfersSummary?.transfers || [];
       if (filters.statusFilter !== 'all') {
         filteredTransfers = filteredTransfers.filter(t => t.status === filters.statusFilter);
@@ -148,7 +147,6 @@ const DataAnalyst = () => {
 
   const exportData = () => {
     try {
-      // Prepare CSV data
       const data = {
         analytics: analyticsData,
         warehouses: warehousesSummary,
@@ -166,7 +164,6 @@ const DataAnalyst = () => {
           `${t.fromWarehouse},${t.toWarehouse},${t.status},${t.items?.reduce((s, i) => s + (i.quantity || 0), 0) || 0}`
         ).join('\n');
       
-      // Create blob and download
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -186,19 +183,13 @@ const DataAnalyst = () => {
 
   return (
     <div className="data-analyst">
-      {/* Status Message */}
       {(loading || analyticsLoading) && (
         <div className="status-message default">Chargement des données...</div>
       )}
 
-      {/* Header */}
       <header className="header">
         <div className="header-container">
-          
-          {/* Left Section: Back + Logo + Navigation */}
           <div className="header-left">
-            
-            {/* Back Link */}
             <a 
               href="#" 
               onClick={(e) => navigateToRole('home', e)} 
@@ -212,9 +203,7 @@ const DataAnalyst = () => {
               Retour
             </a>
 
-            {/* Logo and Navigation Container */}
             <div className="header-left">
-              {/* Logo */}
               <div className="logo-container">
                 <span className="logo-text">StockSync</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="logo-icon">
@@ -225,7 +214,6 @@ const DataAnalyst = () => {
                 </svg>
               </div>
               
-              {/* Main Navigation */}
               <nav className="navigation">
                 <a href="#" className="nav-link" onClick={(e) => navigateToRole('home', e)}>
                   Accueil
@@ -249,9 +237,7 @@ const DataAnalyst = () => {
             </div>
           </div>
 
-          {/* Right Section: Utilities and User */}
           <div className="header-right">
-            {/* Notifications and Settings */}
             <div className="utility-buttons">
               <button 
                 title="Notifications" 
@@ -275,7 +261,6 @@ const DataAnalyst = () => {
               </button>
             </div>
             
-            {/* User Info and Logout */}
             <div className="user-info">
               <span className="user-text">
                 Connecté en tant que: <span className="user-name">{userName}</span>
@@ -291,19 +276,13 @@ const DataAnalyst = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="main-content">
-        
-        {/* Dashboard Title */}
         <div className="dashboard-title">
           <h1>Tableau de Bord : Analyse de Performance</h1>
           <p>Visualisation des indicateurs logistiques en temps réel.</p>
         </div>
         
-        {/* Performance Metrics */}
         <div className="metrics-grid">
-          
-          {/* Rotation des Stocks */}
           <div className="metric-card green">
             <h3>Entrepôts Opérationnels</h3>
             <p className="metric-value green">{analyticsData?.warehouses?.operational || 0}/{analyticsData?.warehouses?.total || 0}</p>
@@ -311,7 +290,6 @@ const DataAnalyst = () => {
             <p className="metric-subtext">Status: Operational</p>
           </div>
 
-          {/* Délai de Préparation Moyen */}
           <div className="metric-card blue">
             <h3>Occupancy Entrepôts</h3>
             <p className="metric-value blue">{remplissageEntrepot}%</p>
@@ -319,7 +297,6 @@ const DataAnalyst = () => {
             <p className="metric-subtext">Max: 90%</p>
           </div>
 
-          {/* Taux d'Erreur */}
           <div className="metric-card red">
             <h3>Transferts en Cours</h3>
             <p className="metric-value red">{analyticsData?.transfers?.inTransit || 0}</p>
@@ -327,7 +304,6 @@ const DataAnalyst = () => {
             <p className="metric-subtext">Total: {analyticsData?.transfers?.total || 0}</p>
           </div>
 
-          {/* Remplissage Entrepôt */}
           <div className="metric-card orange">
             <h3>Alertes Actives</h3>
             <p className="metric-value orange">{alertsSummary?.bySeverity?.high || 0} High</p>
@@ -336,7 +312,6 @@ const DataAnalyst = () => {
           </div>
         </div>
 
-        {/* Charts and Top References Section */}
         <div className="analytics-section">
           <div className="chart-container">
             <div className="section-header">
@@ -347,15 +322,41 @@ const DataAnalyst = () => {
               </svg>
               <h3>Volume de Commandes Traitées (Mois)</h3>
             </div>
-            <div className="chart-placeholder">
-              <p>Espace réservé pour le graphique de volume (ex: D3.js ou Chart.js)</p>
-              <div className="chart-bars">
-                <div className="chart-bar" style={{height: '80%'}}></div>
-                <div className="chart-bar" style={{height: '60%'}}></div>
-                <div className="chart-bar" style={{height: '90%'}}></div>
-                <div className="chart-bar" style={{height: '70%'}}></div>
-                <div className="chart-bar" style={{height: '85%'}}></div>
-              </div>
+            <div className="chart-content">
+              {analyticsLoading ? (
+                <div className="chart-loading">Chargement des données...</div>
+              ) : chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="name" 
+                      stroke="#6b7280"
+                      style={{ fontSize: '0.75rem' }}
+                    />
+                    <YAxis 
+                      stroke="#6b7280"
+                      style={{ fontSize: '0.75rem' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'white', 
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '0.5rem',
+                        fontSize: '0.875rem'
+                      }}
+                      labelStyle={{ color: '#374151', fontWeight: 600 }}
+                    />
+                    <Bar 
+                      dataKey="value" 
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="chart-empty">Aucune donnée disponible</div>
+              )}
             </div>
           </div>
 
@@ -382,7 +383,6 @@ const DataAnalyst = () => {
           </div>
         </div>
         
-        {/* Filters Section */}
         <div className="filters-section">
           <div className="section-header">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -443,7 +443,6 @@ const DataAnalyst = () => {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="footer">
         <div className="footer-content">
           <p>&copy; 2025 StockSync. Optimisation Logistique. Version 1.0</p>

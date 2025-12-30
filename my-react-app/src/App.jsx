@@ -11,7 +11,6 @@ import Accueil from './pages/Accueil';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Main App component with routing
 function App() {
   return (
     <Router>
@@ -71,14 +70,12 @@ function App() {
   );
 }
 
-// Home page component with navigation between main sections
 function HomePage() {
   const [currentPage, setCurrentPage] = useState('');
   const navigate = useNavigate();
 
   const handleNavigation = (page) => {
     setCurrentPage(page);
-    // Update URL based on page
     switch (page) {
       case 'data_analyst':
         navigate('/data-analyst');
@@ -134,7 +131,6 @@ function HomePage() {
   );
 }
 
-// Wrapper components for direct routing
 function DataAnalystWrapper() {
   const navigate = useNavigate();
   
@@ -225,7 +221,6 @@ function ParametresWrapper() {
   return <Parametres onNavigate={handleNavigation} onLogout={handleLogout} />;
 }
 
-// Helper function to handle page navigation consistently
 function handlePageNavigation(page, navigate) {
   switch (page) {
     case 'data_analyst':

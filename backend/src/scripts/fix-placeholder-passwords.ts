@@ -19,7 +19,6 @@ async function fix() {
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to DB');
 
-    // Find users with placeholder or non-bcrypt hashes
     const users = await User.find({ $or: [ { passwordHash: 'placeholder' }, { passwordHash: { $not: /^\$2[aby]\$/ } } ] });
     if (!users.length) {
       console.log('No users with placeholder or non-bcrypt passwordHash found');

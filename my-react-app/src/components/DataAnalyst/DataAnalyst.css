@@ -426,6 +426,22 @@
   text-align: center;
 }
 
+.chart-content {
+  padding: 1.5rem;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-loading,
+.chart-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
 .chart-bars {
   display: flex;
   align-items: end;

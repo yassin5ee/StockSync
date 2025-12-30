@@ -15,7 +15,7 @@ const StockExitSchema = new Schema<IStockExit>({
   warehouse_id: { type: Schema.Types.ObjectId, ref: 'Warehouse', required: true },
   user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   quantity: { type: Number, required: true },
-  destination: { type: String }, // delivery note, customer order...
+  destination: { type: String },
   document_url: { type: String },
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });

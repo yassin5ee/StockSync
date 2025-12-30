@@ -10,6 +10,8 @@ export interface ITransfer extends Document {
   toWarehouse: string;
   items: ITransferItem[];
   status: string;
+  type?: string;
+  destinationLocation?: string;
   scheduledDate?: Date;
   estimatedArrival?: Date;
 }
@@ -24,6 +26,8 @@ const TransferSchema = new Schema<ITransfer>({
   toWarehouse: { type: String, required: true },
   items: { type: [TransferItemSchema], default: [] },
   status: { type: String, default: 'planned' },
+  type: { type: String },
+  destinationLocation: { type: String },
   scheduledDate: { type: Date },
   estimatedArrival: { type: Date }
 }, { timestamps: true });
