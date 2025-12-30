@@ -298,9 +298,7 @@ ${credentials.map((cred, index) => {
 - All passwords are **FIXED** (same every time) for easy development/testing
 - Passwords are hashed using bcrypt before storage
 - All emails must use the \`@stocksync.com\` domain
-- The seed script will clear existing data and create fresh test users
-- **Passwords remain the same each time you run the seed script**
-- **In production, change these passwords or implement proper password reset flows**
+
 
 ---
 *Generated on: ${new Date().toISOString()}*
