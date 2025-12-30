@@ -173,18 +173,20 @@ Frontend will run on `http://localhost:5173`
 
 ```
 StockSync_webapp/
-├── backend/              # Backend API (Node.js + Express + TypeScript)
+├── backend/                  # API Backend (Node.js + Express + TypeScript)
 │   ├── src/
-│   │   ├── models/       # MongoDB models
-│   │   ├── routes/       # API routes
-│   │   ├── middleware/   # Auth middleware
-│   │   └── scripts/      # Seed script
-│   └── .env             # Environment variables (not in git)
-├── my-react-app/         # Frontend (React + Vite)
+│   │   ├── models/           # Modèles MongoDB
+│   │   ├── routes/           # Routes API
+│   │   ├── middleware/       # Auth middleware
+│   │   └── scripts/          # Seed script
+│   └── .env                  # Env vars pour le serveur (DB_URI, PORT, JWT_SECRET...)
+├── my-react-app/             # Frontend (React + Vite)
 │   ├── src/
-│   │   ├── components/  # React components
-│   │   ├── pages/       # Page components
-│   │   └── utils/        # Utilities and API client
+│   │   ├── components/       # Composants React
+│   │   ├── pages/            # Pages
+│   │   └── utils/            # Utilitaires et client API
+│   ├── .env                  # Env vars pour le client (VITE_API_URL...)
+│   └── vite.config.ts        # Configuration Vite
 └── README.md
 ```
 
