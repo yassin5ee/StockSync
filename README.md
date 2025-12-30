@@ -98,6 +98,7 @@ Un système de gestion d'entrepôt complet construit avec React, Node.js, Expres
 
 - Node.js (v16 or higher)
 - MongoDB (local or Atlas)
+  (installation link : https://www.mongodb.com/docs/manual/installation/ )
 - npm or yarn
 
 ##  Installation
@@ -122,6 +123,7 @@ Create a `.env` file in the `backend` directory:
 MONGODB_URI=mongodb://localhost:27017/stocksync
 PORT=4000
 JWT_SECRET=your strong generated jwt secret
+NODE_ENV=development
 ```
 
 ### 3. Frontend Setup
@@ -129,6 +131,12 @@ JWT_SECRET=your strong generated jwt secret
 ```bash
 cd ../my-react-app
 npm install
+npm install recharts
+```
+Create a `.env` file in the `my-react-app` directory:
+
+```env
+VITE_API_URL=http://localhost:4000
 ```
 
 ### 4. Seed the Database
